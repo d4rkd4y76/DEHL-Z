@@ -20,6 +20,6 @@ window.DEHLIZ_CONFIG = window.DEHLIZ_CONFIG || {
     clientToken: "",
     priceIdMonthly: "",
     sellerName: "DEHLİZ",
-    supportEmail: ""
+    supportEmail: "destek.dehliz@gmail.com"
   }
 };

@@ -103,8 +103,15 @@
     <main id="rows"></main>
 
     <footer class="site-footer">
-      <strong>DEHLİZ</strong> — yalnızca kurgu içerik. Tüm hakları saklıdır.<br />
-      Videolar Bunny.net üzerinden yayınlanır. Firebase ile güvenli erişim.
+      <div class="site-footer-inner">
+        <p class="site-footer-brand">DEHLİZ</p>
+        <p class="site-footer-copy">© 2026 DEHLİZ. Tüm hakları saklıdır.</p>
+        <nav class="site-footer-links" aria-label="Yasal bağlantılar">
+          <a href="privacy.html">Gizlilik Politikası</a>
+          <a href="refund-policy.html">İptal/İade Koşulları</a>
+          <a href="contact.html">İletişim</a>
+        </nav>
+      </div>
     </footer>
 
     <div class="modal-backdrop" id="authModal">
@@ -114,7 +121,7 @@
           <button type="button" class="modal-close" data-close="authModal">&times;</button>
         </div>
         <div class="modal-body">
-          <p style="margin-top: 0">E-posta ile giriş veya kayıt. Plus içerikler için yönetici onayı gerekir.</p>
+          <p style="margin-top: 0">E-posta ile giriş veya kayıt.</p>
           <label for="em">E-posta</label>
           <input id="em" type="email" autocomplete="email" />
           <label for="pw">Şifre</label>

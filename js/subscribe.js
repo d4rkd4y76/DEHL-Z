@@ -6,6 +6,7 @@
   const paddlePriceIdMonthly = String(cfg.priceIdMonthly || "").trim();
   const paddleSellerName = String(cfg.sellerName || "DEHLİZ").trim();
   const supportEmail = String(cfg.supportEmail || "").trim();
+  const LEGAL_POLICY_VERSION = "2026-04-26";
   let paddleReady = false;
 
   function normalizeBool(v) {
@@ -40,6 +41,14 @@
     if (opts.showLogin) out.push('<button type="button" class="btn btn-primary" id="statusLoginBtn">Giriş yap</button>');
     if (opts.showSubscribe) out.push('<button type="button" class="btn btn-primary" id="startPaddleCheckoutBtn">+PLUS\'a abone ol</button>');
     if (opts.showRenew) out.push('<button type="button" class="btn btn-primary" id="renewPaddleCheckoutBtn">Aboneliği yenile</button>');
+    if (opts.requireConsent) {
+      out.push(
+        '<label class="sub-consent" for="billingConsent">' +
+          '<input id="billingConsent" type="checkbox" />' +
+          '<span><a href="privacy.html" target="_blank" rel="noopener">Gizlilik Politikası</a> ve <a href="refund-policy.html" target="_blank" rel="noopener">İptal/İade Koşulları</a> metinlerini okudum, kabul ediyorum.</span>' +
+        "</label>"
+      );
+    }
     if (opts.showManage) out.push('<p class="sub-help" style="margin:0.55rem 0 0">Plan değişikliği ve iptal işlemleri için destek ekibiyle iletişime geçebilirsiniz.</p>');
     if (!out.length) return "";
     return '<div class="status-actions">' + out.join("") + "</div>";
@@ -148,7 +157,7 @@
         renewText +
         "</p>" +
         '<ol class="sub-step-list"><li>+PLUS videoları sınırsız açabilirsiniz.</li><li>İçerikleri listenize ekleyip kişisel arşivinizi oluşturabilirsiniz.</li><li>Arka planda dinleme ayrıcalığınız aktif olur.</li></ol>' +
-        statusActionsHtml({ showRenew: true, showManage: true }) +
+        statusActionsHtml({ showRenew: true, showManage: true, requireConsent: true }) +
         supportLinksHtml() +
         "</div>";
       wireCheckoutButtons(user);
@@ -164,7 +173,7 @@
       "</p>" +
       '<p class="status-sub">+PLUS\'a geçmek için tek adım yeterli. Ödemeyi tamamladığınız anda ayrıcalıklarınız otomatik açılır.</p>' +
       '<ol class="sub-step-list"><li>"+PLUS\'a abone ol" butonuna tıklayın.</li><li>Ödeme ekranında kart bilgilerinizi girip işlemi tamamlayın.</li><li>İşlem onaylandıktan sonra +PLUS videoları, liste ve arka plan dinleme özellikleri açılır.</li></ol>' +
-      statusActionsHtml({ showSubscribe: true, showManage: true }) +
+      statusActionsHtml({ showSubscribe: true, showManage: true, requireConsent: true }) +
       (!paddleClientToken || !paddlePriceIdMonthly
         ? '<p class="sub-note">Abonelik sistemi kısa süre içinde aktif ediliyor. Lütfen biraz sonra tekrar deneyin.</p>'
         : "") +
@@ -186,13 +195,39 @@
   }
 
   function wireCheckoutButtons(user) {
+    const readBillingConsent = () => {
+      const el = $("billingConsent");
+      return !!(el && el.checked);
+    };
+    const ensureBillingConsent = () => {
+      if (readBillingConsent()) return true;
+      alert("Devam etmek için Gizlilik Politikası ve İptal/İade Koşulları onayını vermelisiniz.");
+      return false;
+    };
+    const saveBillingConsent = async () => {
+      if (!user || !user.uid) return;
+      await DataService.userRef(user.uid).child("legalConsents").update({
+        subscriptionAccepted: true,
+        subscriptionAcceptedAt: Date.now(),
+        privacyVersion: LEGAL_POLICY_VERSION,
+        refundVersion: LEGAL_POLICY_VERSION
+      });
+    };
     const subscribeBtn = $("startPaddleCheckoutBtn");
     if (subscribeBtn) {
-      subscribeBtn.addEventListener("click", () => openPaddleCheckout(user));
+      subscribeBtn.addEventListener("click", async () => {
+        if (!ensureBillingConsent()) return;
+        await saveBillingConsent();
+        await openPaddleCheckout(user);
+      });
     }
     const renewBtn = $("renewPaddleCheckoutBtn");
     if (renewBtn) {
-      renewBtn.addEventListener("click", () => openPaddleCheckout(user));
+      renewBtn.addEventListener("click", async () => {
+        if (!ensureBillingConsent()) return;
+        await saveBillingConsent();
+        await openPaddleCheckout(user);
+      });
     }
   }
 

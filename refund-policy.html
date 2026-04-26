@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DEHLİZ — İptal ve İade Koşulları</title>
+    <link rel="stylesheet" href="css/app.css" />
+    <style>
+      .legal-main {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: calc(var(--nav-h) + 1.4rem) 4% 3rem;
+      }
+      .legal-card {
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 14px;
+        padding: 1rem 1.05rem;
+        margin-bottom: 0.82rem;
+      }
+      .legal-main h1 {
+        margin: 0 0 0.8rem;
+        font-size: clamp(1.45rem, 3vw, 2rem);
+      }
+      .legal-main h2 {
+        margin: 0 0 0.45rem;
+        font-size: 1.03rem;
+      }
+      .legal-main p,
+      .legal-main li {
+        color: #d4d4d8;
+        line-height: 1.62;
+        font-size: 0.93rem;
+      }
+      .legal-main ul {
+        margin: 0.35rem 0 0;
+        padding-left: 1.15rem;
+      }
+      .legal-main a {
+        color: #93c5fd;
+        text-decoration: underline;
+      }
+      .legal-back {
+        display: inline-block;
+        margin-bottom: 0.65rem;
+        color: #d4d4d8;
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top-nav scrolled">
+      <a href="index.html" class="brand">
+        <img
+          src="https://dehliz.b-cdn.net/videolarda%20giri%C5%9F%20logo.png"
+          alt="DEHLİZ logo"
+          class="brand-logo"
+          loading="lazy"
+        />
+        <span>DEHLİZ</span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html">Ana Sayfa</a>
+        <a href="subscribe.html">+Plus</a>
+      </nav>
+      <div class="nav-tail"></div>
+    </header>
+
+    <main class="legal-main">
+      <a href="#" class="legal-back" id="closeLegalPage">← Ekranı kapat</a>
+      <h1>İptal, İade ve Dijital İçerik Koşulları</h1>
+
+      <section class="legal-card">
+        <h2>Son Güncelleme</h2>
+        <p>Bu metin 26.04.2026 tarihinde güncellenmiştir.</p>
+      </section>
+
+      <section class="legal-card">
+        <h2>1. Abonelik Yapısı</h2>
+        <p>
+          +PLUS üyelikler dönemsel abonelik modeli ile sunulur. Abonelik satın alındığında, ilgili dönem boyunca +PLUS içerik erişimi aktif
+          edilir.
+        </p>
+      </section>
+
+      <section class="legal-card">
+        <h2>2. İptal ve Yenileme</h2>
+        <ul>
+          <li>Kullanıcı aboneliğini bir sonraki yenileme döneminden önce iptal edebilir.</li>
+          <li>İptal sonrasında mevcut fatura dönemi sonuna kadar erişim devam eder.</li>
+          <li>Dönem sonunda otomatik yenileme durur ve yeni ücret tahsil edilmez.</li>
+        </ul>
+      </section>
+
+      <section class="legal-card">
+        <h2>3. Cayma ve İade Koşulları</h2>
+        <ul>
+          <li>
+            Hizmet dijital içerik niteliğindedir. Erişimin aktif edildiği durumlarda iade talepleri, ilgili mevzuat ve işlemin niteliğine göre
+            değerlendirilir.
+          </li>
+          <li>Hatalı veya mükerrer tahsilatlarda inceleme öncelikli yapılır ve uygun bulunması halinde iade süreci başlatılır.</li>
+          <li>İade kararı verildiğinde tutar, ödeme sağlayıcısı ve bankaya bağlı olarak genellikle 3-10 iş günü içinde karta yansır.</li>
+          <li>Ödeme sağlayıcısının kendi uyuşmazlık/iade kuralları ayrıca uygulanabilir.</li>
+        </ul>
+      </section>
+
+      <section class="legal-card">
+        <h2>4. Ön Bilgilendirme ve Onay</h2>
+        <p>
+          Kullanıcı, ödeme adımına geçmeden önce bu metni ve gizlilik politikasını okuyup onayladığını kabul eder. Onay bilgisi tarih/saat ve
+          metin sürümü ile birlikte sistemde kayıt altına alınabilir.
+        </p>
+      </section>
+
+      <section class="legal-card">
+        <h2>5. Vergi ve Faturalama Notu</h2>
+        <p>
+          Hizmet bireysel içerik üreticisi tarafından sunulur. Ödemeye ilişkin vergisel yükümlülükler, tahsilat modeline ve işlem tarihindeki
+          mevzuata göre uygulanır. Bu metin mali müşavirlik veya hukuki danışmanlık yerine geçmez.
+        </p>
+      </section>
+
+      <section class="legal-card">
+        <h2>6. Destek ve Talep Süreci</h2>
+        <p>
+          İptal ve iade taleplerinizi iletişim sayfasındaki e-posta adresleri üzerinden iletebilirsiniz. Başvurular makul süre içinde
+          sonuçlandırılır ve süreç hakkında e-posta ile bilgilendirme yapılır.
+        </p>
+      </section>
+    </main>
+    <script>
+      (function () {
+        var btn = document.getElementById("closeLegalPage");
+        if (!btn) return;
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          window.close();
+          setTimeout(function () {
+            if (window.history.length > 1) {
+              window.history.back();
+            }
+          }, 120);
+        });
+      })();
+    </script>
+  </body>
+</html>

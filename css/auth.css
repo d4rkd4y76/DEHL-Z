@@ -88,6 +88,29 @@ select {
   padding: 0.6rem 0.7rem;
 }
 
+.consent-check {
+  margin: 0.35rem 0 0.65rem;
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 0.6rem;
+  align-items: start;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: #d4d4d8;
+}
+
+.consent-check input[type="checkbox"] {
+  margin: 0.15rem 0 0;
+  width: 16px;
+  height: 16px;
+}
+
+.consent-check a {
+  color: #93c5fd;
+}
+
 .btn {
   width: 100%;
   border: none;

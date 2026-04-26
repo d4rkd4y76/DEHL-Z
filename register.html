@@ -11,9 +11,7 @@
       <section class="auth-card">
         <a href="index.html" class="brand">DEHLİZ</a>
         <h1>Yeni Üyelik Oluştur</h1>
-        <p class="auth-sub">
-          Yorumlarda görünecek kullanıcı adını sen belirle. Plus hesaplarda adının yanında özel ibare görünür.
-        </p>
+        <p class="auth-sub">Yorumlarda görünecek kullanıcı adını sen belirle.</p>
 
         <label for="regName">Kullanıcı adı</label>
         <input id="regName" type="text" maxlength="32" placeholder="ornek: KaranlikYazar" />
@@ -38,6 +36,14 @@
 
         <label for="regSecretA">Gizli soru cevabı</label>
         <input id="regSecretA" type="text" maxlength="64" autocomplete="off" />
+
+        <label class="consent-check" for="regLegalConsent">
+          <input id="regLegalConsent" type="checkbox" />
+          <span>
+            <a id="privacyLink" href="privacy.html">Gizlilik Politikası</a> ve
+            <a id="refundLink" href="refund-policy.html">İptal/İade Koşulları</a> metinlerini okudum, kabul ediyorum.
+          </span>
+        </label>
 
         <p class="msg msg-error hidden" id="regErr"></p>
         <p class="msg msg-ok hidden" id="regOk"></p>

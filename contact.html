@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DEHLİZ — İletişim</title>
+    <link rel="stylesheet" href="css/app.css" />
+    <style>
+      .legal-main {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: calc(var(--nav-h) + 1.4rem) 4% 3rem;
+      }
+      .legal-card {
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 14px;
+        padding: 1rem 1.05rem;
+        margin-bottom: 0.82rem;
+      }
+      .legal-main h1 {
+        margin: 0 0 0.8rem;
+        font-size: clamp(1.45rem, 3vw, 2rem);
+      }
+      .legal-main h2 {
+        margin: 0 0 0.45rem;
+        font-size: 1.03rem;
+      }
+      .legal-main p,
+      .legal-main li {
+        color: #d4d4d8;
+        line-height: 1.62;
+        font-size: 0.93rem;
+      }
+      .legal-main a {
+        color: #93c5fd;
+        text-decoration: underline;
+      }
+      .legal-back {
+        display: inline-block;
+        margin-bottom: 0.65rem;
+        color: #d4d4d8;
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top-nav scrolled">
+      <a href="index.html" class="brand">
+        <img
+          src="https://dehliz.b-cdn.net/videolarda%20giri%C5%9F%20logo.png"
+          alt="DEHLİZ logo"
+          class="brand-logo"
+          loading="lazy"
+        />
+        <span>DEHLİZ</span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html">Ana Sayfa</a>
+        <a href="subscribe.html">+Plus</a>
+      </nav>
+      <div class="nav-tail"></div>
+    </header>
+
+    <main class="legal-main">
+      <a href="#" class="legal-back" id="closeLegalPage">← Ekranı kapat</a>
+      <h1>İletişim</h1>
+
+      <section class="legal-card">
+        <h2>Destek</h2>
+        <p>
+          Hesap, abonelik, iade ve teknik destek talepleriniz için bize e-posta üzerinden ulaşabilirsiniz:
+          <a href="mailto:destek.dehliz@gmail.com">destek.dehliz@gmail.com</a>
+        </p>
+      </section>
+
+      <section class="legal-card">
+        <h2>İş Birliği ve Resmi Talepler</h2>
+        <p>
+          İş birliği, lisanslama ve resmi iletişim konuları için:
+          <a href="mailto:destek.dehliz@gmail.com">destek.dehliz@gmail.com</a>
+        </p>
+      </section>
+
+      <section class="legal-card">
+        <h2>Yanıt Süresi</h2>
+        <p>İletişim talepleri yoğunluğa bağlı olarak mümkün olan en kısa sürede değerlendirilir.</p>
+      </section>
+    </main>
+    <script>
+      (function () {
+        var btn = document.getElementById("closeLegalPage");
+        if (!btn) return;
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          window.close();
+          setTimeout(function () {
+            if (window.history.length > 1) {
+              window.history.back();
+            }
+          }, 120);
+        });
+      })();
+    </script>
+  </body>
+</html>
