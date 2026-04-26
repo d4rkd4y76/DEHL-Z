@@ -1,0 +1,64 @@
+.search-main {
+  padding: calc(var(--nav-h) + 1.25rem) 4% 2.4rem;
+}
+
+.search-head {
+  margin-bottom: 1rem;
+}
+
+.search-back {
+  display: inline-block;
+  margin-bottom: 0.62rem;
+  font-size: 0.84rem;
+  color: #d4d4d8;
+}
+
+.search-head h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+}
+
+#searchMeta {
+  margin: 0.45rem 0 0;
+  color: #a1a1aa;
+  font-size: 0.9rem;
+}
+
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 0.72rem;
+}
+
+.search-card {
+  width: 100%;
+}
+
+.search-card .card-poster {
+  aspect-ratio: 16 / 9;
+}
+
+.search-page-form {
+  width: min(520px, 50vw);
+}
+
+@media (max-width: 900px) {
+  .search-page-form {
+    width: min(460px, 56vw);
+  }
+}
+
+@media (max-width: 640px) {
+  .search-main {
+    padding-top: calc(var(--nav-h) + 0.9rem);
+  }
+
+  .search-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .search-page-form {
+    width: min(64vw, 340px);
+  }
+}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DEHLİZ — Kategori</title>
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="css/category.css" />
+  </head>
+  <body>
+    <header class="top-nav scrolled" id="nav">
+      <a href="index.html" class="brand">
+        <img
+          src="https://dehliz.b-cdn.net/videolarda%20giri%C5%9F%20logo.png"
+          alt="DEHLİZ logo"
+          class="brand-logo"
+          loading="lazy"
+        />
+        <span>DEHLİZ</span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html">Ana Sayfa</a>
+        <a href="subscribe.html">+Plus</a>
+      </nav>
+      <div class="nav-tail">
+        <div id="navUserBlock" class="nav-user nav-user--hidden">
+          <span id="userEmail" class="nav-email" title=""></span>
+          <span id="proChip" class="pro-badge pro-badge-nav" style="display: none" aria-label="Plus üyelik">+PLUS</span>
+        </div>
+        <div class="nav-buttons">
+          <button type="button" class="btn btn-ghost" id="btnLogin">Giriş</button>
+          <button type="button" class="btn btn-primary" id="btnLogout" style="display: none">Çıkış</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="category-main">
+      <section class="category-head">
+        <a href="index.html" class="category-back">← Ana sayfaya dön</a>
+        <h1 id="catTitle">Kategori</h1>
+        <p id="catMeta">İçerikler yükleniyor…</p>
+      </section>
+
+      <section class="category-grid" id="catGrid"></section>
+    </main>
+
+    <div class="modal-backdrop" id="authModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Hesap</h2>
+          <button type="button" class="modal-close" data-close="authModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="margin-top: 0">E-posta ile giriş veya kayıt.</p>
+          <label for="em">E-posta</label>
+          <input id="em" type="email" autocomplete="email" />
+          <label for="pw">Şifre</label>
+          <input id="pw" type="password" autocomplete="current-password" />
+          <p id="authErr" class="msg msg-error" style="display: none"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" id="doRegister">Kayıt ekranı</button>
+          <button type="button" class="btn btn-primary" id="doLogin">Giriş yap</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="detailModal">
+      <div class="modal modal-detail">
+        <div class="detail-hero" id="dHero">
+          <button type="button" class="btn btn-list detail-list-btn hidden" id="dListToggle">Listene ekle</button>
+        </div>
+        <div class="modal-header">
+          <h2 id="dTitle">—</h2>
+        </div>
+        <div class="modal-body">
+          <div class="detail-meta" id="dMeta"></div>
+          <p id="dBody"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="dPlay">Oynat</button>
+          <button type="button" class="btn btn-ghost" data-close="detailModal">Kapat</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/data-service.js"></script>
+    <script src="js/category.js"></script>
+  </body>
+</html>

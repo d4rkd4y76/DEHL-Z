@@ -1,0 +1,75 @@
+{
+  "rules": {
+    "admins": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))"
+      }
+    },
+    "settings": {
+      ".read": true,
+      ".write": "auth != null && (!data.exists() || root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))"
+    },
+    "categories": {
+      ".read": true,
+      ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))"
+    },
+    "content": {
+      ".read": true,
+      ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))"
+    },
+    "users": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()) || (auth.uid === $uid && ((!data.exists() && newData.child('isPro').val() === false) || (data.exists() && newData.child('isPro').val() === data.child('isPro').val()))))",
+        "myList": {
+          "$contentId": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))",
+            ".validate": "!newData.exists() || newData.val() === true"
+          }
+        }
+      }
+    },
+    "comments": {
+      "$contentId": {
+        ".read": true,
+        "$commentId": {
+          ".write": "auth != null && ((!data.exists() && root.child('commentBans').child(auth.uid).child('banned').val() !== true && newData.child('uid').val() == auth.uid) || (data.exists() && data.child('uid').val() == auth.uid && newData.child('uid').val() == data.child('uid').val() && newData.child('createdAt').val() == data.child('createdAt').val()) || (data.exists() && !newData.exists() && (root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))))",
+          ".validate": "newData.hasChildren(['uid','displayName','text','createdAt']) && newData.child('uid').isString() && newData.child('displayName').isString() && newData.child('displayName').val().length >= 1 && newData.child('displayName').val().length <= 32 && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 800 && newData.child('createdAt').isNumber() && (!newData.child('isPro').exists() || newData.child('isPro').isBoolean()) && (!newData.child('isAdmin').exists() || newData.child('isAdmin').isBoolean())",
+          "likes": {
+            "$uid": {
+              ".write": "auth != null && auth.uid == $uid && ((!data.exists() && newData.exists() && newData.val() === true) || (data.exists() && !newData.exists()))",
+              ".validate": "!newData.exists() || newData.val() === true"
+            }
+          },
+          "replies": {
+            "$replyId": {
+              ".write": "auth != null && ((!data.exists() && root.child('commentBans').child(auth.uid).child('banned').val() !== true && newData.child('uid').val() == auth.uid) || (data.exists() && data.child('uid').val() == auth.uid && newData.child('uid').val() == auth.uid) || (data.exists() && !newData.exists() && (root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))))",
+              ".validate": "newData.hasChildren(['uid','displayName','text','createdAt']) && newData.child('uid').isString() && newData.child('uid').val() == auth.uid && newData.child('displayName').isString() && newData.child('displayName').val().length >= 1 && newData.child('displayName').val().length <= 32 && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 400 && newData.child('createdAt').isNumber() && (!newData.child('isPro').exists() || newData.child('isPro').isBoolean()) && (!newData.child('isAdmin').exists() || newData.child('isAdmin').isBoolean())"
+            }
+          },
+          "adminHearted": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))",
+            ".validate": "!newData.exists() || newData.val() === true"
+          },
+          "adminHeartAt": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))",
+            ".validate": "!newData.exists() || newData.isNumber()"
+          },
+          "adminHeartBy": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))",
+            ".validate": "!newData.exists() || newData.val() == auth.uid"
+          }
+        }
+      }
+    },
+    "commentBans": {
+      ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))",
+      "$uid": {
+        ".read": "auth != null && (auth.uid == $uid || root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.token.email != null && root.child('settings').child('ownerEmail').val() != null && auth.token.email.toLowerCase() == root.child('settings').child('ownerEmail').val().toLowerCase()))",
+        ".validate": "!newData.exists() || (newData.hasChildren(['banned','bannedAt','bannedBy']) && newData.child('banned').val() === true && newData.child('bannedAt').isNumber() && newData.child('bannedBy').isString())"
+      }
+    }
+  }
+}

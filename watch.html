@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DEHLİZ — İzle</title>
+    <link rel="stylesheet" href="css/watch.css" />
+  </head>
+  <body>
+    <header class="watch-top">
+      <a href="index.html">← Ana sayfa</a>
+      <a href="subscribe.html" style="font-size: 0.85rem; color: #a1a1aa">+Plus</a>
+    </header>
+    <div class="player-wrap">
+      <div class="ratio" id="ratio">
+        <div id="lock" class="lock-overlay" style="display: none">
+          <h1>Plus içerik</h1>
+          <p>Bu film yalnızca Plus üyeler içindir. Abonelik için yöneticinizle iletişime geçin veya abonelik sayfasını ziyaret edin.</p>
+          <p style="margin-top: 1rem">
+            <a href="subscribe.html" style="color: #fff; text-decoration: underline">Plus hakkında</a>
+          </p>
+        </div>
+        <iframe id="player" title="Video oynatıcı" allow="accelerometer; gyroscope; encrypted-media; picture-in-picture;" allowfullscreen></iframe>
+      </div>
+    </div>
+    <article class="meta-panel" id="meta"></article>
+    <section class="meta-panel" id="episodesPanel" style="padding-top: 0">
+      <h2 style="margin: 0 0 0.6rem; font-size: 1.1rem">Bölümler</h2>
+      <div id="episodesList" class="episodes-list"></div>
+    </section>
+    <section class="meta-panel" id="commentsPanel" style="padding-top: 0">
+      <h2 style="margin: 0 0 0.6rem; font-size: 1.1rem">Yorumlar</h2>
+      <div class="comment-form-card" id="commentAuthBox">
+        <p class="comment-auth-msg">Yorum yazmak için giriş yapın.</p>
+        <div class="comment-auth-row">
+          <input id="cLoginEmail" type="email" placeholder="E-posta" />
+          <input id="cLoginPw" type="password" placeholder="Şifre" />
+        </div>
+        <div class="comment-auth-row">
+          <button type="button" class="comment-btn" id="cLoginBtn">Giriş yap</button>
+          <button type="button" class="comment-btn ghost" id="cRegisterBtn">Kayıt ol</button>
+        </div>
+        <p id="cAuthErr" class="comment-error hidden"></p>
+        <p id="cAuthOk" class="comment-ok hidden"></p>
+      </div>
+      <div class="comment-form-card hidden" id="commentWriteBox">
+        <div class="comment-headline">
+          <span id="commentAs"></span>
+          <button type="button" class="comment-btn ghost" id="cLogoutBtn">Çıkış</button>
+        </div>
+        <textarea id="commentInput" maxlength="800" placeholder="Bu içerik hakkında düşüncelerini yaz..."></textarea>
+        <div class="comment-meta-row">
+          <span id="commentLimit">0 / 800</span>
+          <button type="button" class="comment-btn" id="commentSendBtn">Yorum Gönder</button>
+        </div>
+      </div>
+      <div id="commentsList" class="comments-list"></div>
+    </section>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/data-service.js"></script>
+    <script src="js/watch.js"></script>
+  </body>
+</html>

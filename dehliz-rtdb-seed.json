@@ -1,0 +1,70 @@
+{
+  "settings": {
+    "siteTitle": "DEHLİZ",
+    "tagline": "Korkunun yeni adresi. Aşağıdaki örnek içerikleri Bunny ID’leriyle güncelleyin.",
+    "heroIntervalMs": 8000,
+    "heroContentIds": ["ornek_herkese_acik", "ornek_pro_film"],
+    "ownerEmail": "alican.cyr@gmail.com"
+  },
+  "categories": {
+    "one_cikanlar": {
+      "name": "Öne çıkanlar",
+      "order": 0,
+      "visible": true
+    },
+    "yeni_cikislar": {
+      "name": "Yeni çıkışlar",
+      "order": 1,
+      "visible": true
+    },
+    "dehliz_orijinal": {
+      "name": "DEHLİZ orijinal",
+      "order": 2,
+      "visible": true
+    },
+    "klasik_korku": {
+      "name": "Klasik korku",
+      "order": 3,
+      "visible": true
+    },
+    "gece_maratonu": {
+      "name": "Gece maratonu",
+      "order": 4,
+      "visible": true
+    }
+  },
+  "content": {
+    "ornek_herkese_acik": {
+      "title": "Örnek: Herkese açık film",
+      "description": "Yönetim panelinden Bunny Kütüphane ID ve Video ID girin; poster ve backdrop URL’lerini değiştirin.",
+      "posterUrl": "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=800&q=80",
+      "backdropUrl": "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1920&q=80",
+      "year": "2026",
+      "maturity": "18+",
+      "bunnyLibraryId": "",
+      "bunnyVideoId": "",
+      "categories": ["one_cikanlar", "yeni_cikislar"],
+      "order": 0,
+      "featuredOrder": 1,
+      "featured": true,
+      "isPro": false
+    },
+    "ornek_pro_film": {
+      "title": "Örnek: PRO film",
+      "description": "PRO işaretli içerik yalnızca isPro: true kullanıcılara açılır. Kullanıcılar sekmesinden test edin.",
+      "posterUrl": "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=800&q=80",
+      "backdropUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&q=80",
+      "year": "2026",
+      "maturity": "18+",
+      "bunnyLibraryId": "",
+      "bunnyVideoId": "",
+      "categories": ["one_cikanlar", "dehliz_orijinal"],
+      "order": 1,
+      "featuredOrder": 2,
+      "featured": true,
+      "isPro": true
+    }
+  },
+  "admins": {},
+  "users": {}
+}

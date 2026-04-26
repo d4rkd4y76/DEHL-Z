@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DEHLİZ — Plus</title>
+    <link rel="stylesheet" href="css/app.css" />
+    <style>
+      .sub-hero {
+        padding: calc(var(--nav-h) + 1.8rem) 4% 1.15rem;
+        background:
+          radial-gradient(110% 75% at 50% 0%, rgba(220, 38, 38, 0.24), rgba(220, 38, 38, 0) 62%),
+          var(--bg);
+      }
+      .sub-grid {
+        max-width: 980px;
+        margin: 0 auto;
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 1fr;
+        padding: 0 4% 3.2rem;
+      }
+      .sub-grid.single {
+        grid-template-columns: 1fr;
+      }
+      @media (max-width: 800px) {
+        .sub-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 720px) {
+        .sub-hero {
+          padding-top: clamp(5.75rem, 28vw, 8.5rem) !important;
+        }
+      }
+      .price-card {
+        background:
+          radial-gradient(120% 160% at 100% 0%, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0) 52%),
+          linear-gradient(180deg, rgba(20, 20, 27, 0.98), rgba(14, 14, 20, 0.98));
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+        padding: 1.4rem 1.45rem 1.35rem;
+        box-shadow:
+          0 20px 54px rgba(0, 0, 0, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+      .price-card h2 {
+        margin: 0 0 0.5rem;
+        font-size: clamp(1.45rem, 2.7vw, 1.8rem);
+        letter-spacing: -0.01em;
+      }
+      .price-card .amt {
+        font-size: clamp(2.1rem, 5vw, 2.6rem);
+        font-weight: 900;
+        color: #fbbf24;
+      }
+      .price-sub {
+        margin: 0.2rem 0 0.95rem;
+        color: #e4e4e7;
+        font-size: 0.98rem;
+        line-height: 1.5;
+      }
+      .feat {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0 0;
+        color: #d4d4d8;
+        line-height: 1.68;
+        font-size: 0.96rem;
+      }
+      .feat li::before {
+        content: "✓ ";
+        color: #22c55e;
+        font-weight: 700;
+      }
+      .status-box {
+        max-width: 980px;
+        margin: 0 auto 1rem;
+        padding: 0 4%;
+      }
+      .status-card {
+        background:
+          radial-gradient(120% 170% at 0% 0%, rgba(30, 64, 175, 0.12), rgba(30, 64, 175, 0) 60%),
+          linear-gradient(180deg, rgba(22, 22, 30, 0.98), rgba(14, 14, 20, 0.98));
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 16px;
+        padding: 1.25rem 1.28rem;
+        box-shadow:
+          0 20px 54px rgba(0, 0, 0, 0.42),
+          inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+      .status-title {
+        margin: 0;
+        font-size: 1.06rem;
+        font-weight: 760;
+      }
+      .status-sub {
+        margin: 0.52rem 0 0;
+        color: #d4d4d8;
+        line-height: 1.62;
+        font-size: 0.97rem;
+      }
+      .status-actions {
+        display: flex;
+        gap: 0.62rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+      }
+      .status-card .btn {
+        min-height: 42px;
+        padding: 0.62rem 1rem;
+        font-weight: 700;
+      }
+      .status-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        padding: 0.3rem 0.62rem;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+      }
+      .status-chip.plus {
+        color: #f8c852;
+        border: 1px solid rgba(251, 191, 36, 0.45);
+        background: rgba(251, 191, 36, 0.12);
+      }
+      .status-chip.free {
+        color: #d4d4d8;
+        border: 1px solid rgba(161, 161, 170, 0.38);
+        background: rgba(63, 63, 70, 0.28);
+      }
+      .status-chip.pending {
+        color: #93c5fd;
+        border: 1px solid rgba(96, 165, 250, 0.48);
+        background: rgba(37, 99, 235, 0.15);
+      }
+      .sub-step-list {
+        margin: 0.8rem 0 0;
+        padding: 0 0 0 1rem;
+        color: #e4e4e7;
+        line-height: 1.72;
+        font-size: 0.96rem;
+      }
+      .sub-step-list li {
+        margin-bottom: 0.22rem;
+      }
+      .sub-help {
+        margin-top: 0.9rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .sub-help a {
+        color: #93c5fd;
+        text-decoration: underline;
+      }
+      .sub-note {
+        margin-top: 0.95rem;
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        background: rgba(250, 204, 21, 0.08);
+        color: #f4f4f5;
+        border-radius: 10px;
+        padding: 0.72rem 0.82rem;
+        font-size: 0.9rem;
+        line-height: 1.58;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top-nav scrolled">
+      <a href="index.html" class="brand">
+        <img
+          src="https://dehliz.b-cdn.net/videolarda%20giri%C5%9F%20logo.png"
+          alt="DEHLİZ logo"
+          class="brand-logo"
+          loading="lazy"
+        />
+        <span>DEHLİZ</span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html">Ana Sayfa</a>
+        <a href="subscribe.html" class="active">+Plus</a>
+      </nav>
+      <div class="nav-tail">
+        <div class="nav-buttons">
+          <button type="button" class="btn btn-ghost" id="btnLogin">Giriş</button>
+          <button type="button" class="btn btn-primary" id="btnLogout" style="display: none">Çıkış</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="sub-hero">
+      <h1 style="font-size: clamp(2rem, 4vw, 2.75rem); margin: 0 0 0.5rem">DEHLİZ +Plus</h1>
+      <p style="color: var(--muted); max-width: 560px; line-height: 1.6; margin: 0">
+        +PLUS ile kilitli içeriklere eriş, kendi listeni oluştur, içerikleri arka planda dinle ve kesintisiz bir deneyim yaşa.
+      </p>
+    </section>
+
+    <div class="status-box" id="statusBox"></div>
+
+    <div class="sub-grid single">
+      <div class="price-card">
+        <h2>+Plus Aylık Plan</h2>
+        <p class="amt" id="plusPriceText">120 ₺</p>
+        <p class="price-sub">Aylık yenilenen üyelik ile tüm +PLUS ayrıcalıklarına anında erişim.</p>
+        <ul class="feat">
+          <li>+PLUS etiketli tüm videolara erişim</li>
+          <li>Listene ekle / listenden çıkar ile kişisel arşiv</li>
+          <li>Arka planda dinleme ayrıcalığı</li>
+          <li>Yenileme tarihi ve üyelik durumunu tek ekranda takip</li>
+        </ul>
+        <div class="sub-note">
+          Ödeme tamamlandığında üyeliğiniz otomatik olarak güncellenir. Her ay manuel yenileme bağlantısıyla uğraşmanıza gerek kalmaz.
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="authModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Hesap</h2>
+          <button type="button" class="modal-close" data-close="authModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <label for="em">E-posta</label>
+          <input id="em" type="email" />
+          <label for="pw">Şifre</label>
+          <input id="pw" type="password" />
+          <p id="authErr" class="msg msg-error" style="display: none"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" id="doRegister">Kayıt ekranı</button>
+          <button type="button" class="btn btn-primary" id="doLogin">Giriş</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/data-service.js"></script>
+    <script src="js/subscribe.js"></script>
+  </body>
+</html>

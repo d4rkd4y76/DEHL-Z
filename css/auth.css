@@ -1,0 +1,132 @@
+:root {
+  --bg: #09090b;
+  --panel: #18181b;
+  --border: #27272a;
+  --text: #fafafa;
+  --muted: #a1a1aa;
+  --accent: #dc2626;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, rgba(220, 38, 38, 0.2), transparent 45%), var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.auth-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+}
+
+.brand {
+  display: inline-block;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.auth-sub {
+  margin: 0.55rem 0 1rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+input {
+  width: 100%;
+  margin-bottom: 0.75rem;
+  background: #0c0c0e;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  padding: 0.6rem 0.7rem;
+}
+
+select {
+  width: 100%;
+  margin-bottom: 0.75rem;
+  background: #0c0c0e;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  padding: 0.6rem 0.7rem;
+}
+
+.btn {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 0.45rem;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.msg {
+  padding: 0.6rem 0.7rem;
+  border-radius: 8px;
+  margin: 0.2rem 0 0.4rem;
+  font-size: 0.85rem;
+}
+
+.msg-error {
+  background: rgba(220, 38, 38, 0.15);
+  color: #fca5a5;
+}
+
+.msg-ok {
+  background: rgba(34, 197, 94, 0.12);
+  color: #86efac;
+}
+
+.hidden {
+  display: none !important;
+}

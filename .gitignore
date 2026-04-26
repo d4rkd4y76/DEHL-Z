@@ -1,0 +1,4 @@
+# Yerel gizli yapılandırma — repoya asla göndermeyin
+js/config.local.js
+.DS_Store
+Thumbs.db

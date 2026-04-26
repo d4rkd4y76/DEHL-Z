@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DEHLİZ — Kayıt Ol</title>
+    <link rel="stylesheet" href="css/auth.css" />
+  </head>
+  <body>
+    <main class="auth-wrap">
+      <section class="auth-card">
+        <a href="index.html" class="brand">DEHLİZ</a>
+        <h1>Yeni Üyelik Oluştur</h1>
+        <p class="auth-sub">
+          Yorumlarda görünecek kullanıcı adını sen belirle. Plus hesaplarda adının yanında özel ibare görünür.
+        </p>
+
+        <label for="regName">Kullanıcı adı</label>
+        <input id="regName" type="text" maxlength="32" placeholder="ornek: KaranlikYazar" />
+
+        <label for="regEmail">E-posta</label>
+        <input id="regEmail" type="email" autocomplete="email" />
+
+        <label for="regPw">Şifre</label>
+        <input id="regPw" type="password" autocomplete="new-password" />
+
+        <label for="regPw2">Şifre (tekrar)</label>
+        <input id="regPw2" type="password" autocomplete="new-password" />
+
+        <label for="regSecretQ">Gizli soru</label>
+        <select id="regSecretQ">
+          <option value="">Bir soru seçin</option>
+          <option value="İlkokul öğretmeninizin adı nedir?">İlkokul öğretmeninizin adı nedir?</option>
+          <option value="En sevdiğiniz film nedir?">En sevdiğiniz film nedir?</option>
+          <option value="Doğduğunuz ilçenin adı nedir?">Doğduğunuz ilçenin adı nedir?</option>
+          <option value="Çocukluk lakabınız nedir?">Çocukluk lakabınız nedir?</option>
+        </select>
+
+        <label for="regSecretA">Gizli soru cevabı</label>
+        <input id="regSecretA" type="text" maxlength="64" autocomplete="off" />
+
+        <p class="msg msg-error hidden" id="regErr"></p>
+        <p class="msg msg-ok hidden" id="regOk"></p>
+
+        <button type="button" class="btn btn-primary" id="btnRegister">Kayıt ol</button>
+        <button type="button" class="btn btn-ghost" id="btnToLogin">Zaten üyeyim, giriş yap</button>
+      </section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/data-service.js"></script>
+    <script src="js/register.js"></script>
+  </body>
+</html>

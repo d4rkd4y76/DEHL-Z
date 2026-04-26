@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DEHLİZ — Arama Sonuçları</title>
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="css/search.css" />
+  </head>
+  <body>
+    <header class="top-nav scrolled">
+      <a href="index.html" class="brand">
+        <img
+          src="https://dehliz.b-cdn.net/videolarda%20giri%C5%9F%20logo.png"
+          alt="DEHLİZ logo"
+          class="brand-logo"
+          loading="lazy"
+        />
+        <span>DEHLİZ</span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html">Ana Sayfa</a>
+        <a href="subscribe.html">+Plus</a>
+      </nav>
+      <div class="nav-tail">
+        <form class="nav-search-form search-page-form" id="searchPageForm" role="search">
+          <input
+            id="searchPageInput"
+            class="nav-search-input"
+            type="search"
+            placeholder="Film, bölüm veya anahtar kelime ara..."
+            autocomplete="off"
+            aria-label="Arama"
+          />
+          <button type="submit" class="nav-search-btn">Ara</button>
+        </form>
+      </div>
+    </header>
+
+    <main class="search-main">
+      <section class="search-head">
+        <a href="index.html" class="search-back">← Ana sayfaya dön</a>
+        <h1 id="searchTitle">Arama</h1>
+        <p id="searchMeta">Sonuçlar hazırlanıyor…</p>
+      </section>
+      <section class="search-grid" id="searchGrid"></section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/data-service.js"></script>
+    <script src="js/search.js"></script>
+  </body>
+</html>

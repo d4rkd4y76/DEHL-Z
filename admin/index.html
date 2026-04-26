@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DEHLİZ — Yönetim</title>
+    <link rel="stylesheet" href="../css/admin.css" />
+  </head>
+  <body>
+    <div id="loginView" class="login-center">
+      <div class="login-box">
+        <h1>DEHLİZ Yönetim</h1>
+        <p>
+          Yetkili hesap: <code>dehliz-rtdb-seed.json</code> içindeki <code>settings/ownerEmail</code> ile aynı
+          e-posta ile giriş yapın (veya klasik <code>admins/&lt;UID&gt;</code> yolu).
+        </p>
+        <div id="loginMsg" class="msg msg-error hidden"></div>
+        <label for="lem">E-posta</label>
+        <input id="lem" type="email" autocomplete="username" />
+        <label for="lpw">Şifre</label>
+        <input id="lpw" type="password" autocomplete="current-password" />
+        <button type="button" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem" id="btnAdminLogin">
+          Giriş
+        </button>
+        <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--muted); line-height: 1.5">
+          <strong>İlk kurulum:</strong> Firebase Console → Authentication → E-posta/şifre etkinleştirin.<br />
+          Realtime Database → <code>database.rules.json</code> kurallarını yayınlayın.<br />
+          Realtime Database → JSON içe aktar: projedeki <code>dehliz-rtdb-seed.json</code> (veya elle
+          <code>settings/ownerEmail</code>). Alternatif: <code>admins / [UID] = true</code>.
+        </p>
+        <p style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--muted)">
+          <a href="../index.html" style="color: #fca5a5">← Siteye dön</a>
+        </p>
+      </div>
+    </div>
+
+    <div id="deniedView" class="login-center hidden">
+      <div class="login-box">
+        <h1>Yetkisiz</h1>
+        <p>Bu hesap yönetici listesinde değil.</p>
+        <p id="deniedUid" style="word-break: break-all; font-size: 0.85rem; color: var(--muted)"></p>
+        <p style="font-size: 0.85rem; color: var(--muted)">
+          JSON’da <code>settings/ownerEmail</code> e-postanızla eşleşiyor mu kontrol edin; veya
+          <code>admins/&lt;bu UID&gt;</code> = <code>true</code>.
+        </p>
+        <button type="button" class="btn btn-ghost" id="btnDeniedOut">Çıkış</button>
+      </div>
+    </div>
+
+    <div id="appView" class="admin-layout hidden">
+      <aside class="admin-sidebar">
+        <h1>DEHLİZ</h1>
+        <nav class="admin-nav">
+          <a href="#" data-tab="dash" class="active">Özet</a>
+          <a href="#" data-tab="settings">Site &amp; afiş</a>
+          <a href="#" data-tab="cats">Kategoriler</a>
+          <a href="#" data-tab="content">İçerik</a>
+          <a href="#" data-tab="users">Kullanıcılar</a>
+          <a href="#" data-tab="bans">Engellenenler</a>
+        </nav>
+        <button type="button" class="btn btn-ghost" style="width: 100%; margin-top: 2rem" id="btnAppOut">
+          Çıkış
+        </button>
+      </aside>
+      <main class="admin-main">
+        <div class="admin-header">
+          <h2 id="panelTitle">Özet</h2>
+          <a class="btn btn-ghost" href="../index.html" target="_blank" rel="noopener">Siteyi aç</a>
+        </div>
+
+        <section id="tab-dash">
+          <div class="card" id="dashStats"></div>
+        </section>
+
+        <section id="tab-settings" class="hidden">
+          <div class="card">
+            <label>Ana yönetici e-postası (<code>settings/ownerEmail</code>)</label>
+            <input id="s_owner" type="email" autocomplete="off" />
+            <p id="s_rule_status" class="field-hint" style="margin-top: 0.35rem"></p>
+            <label>Site başlığı</label>
+            <input id="s_title" />
+            <label>Slogan (hero boşken)</label>
+            <input id="s_tagline" />
+            <div class="grid-2">
+              <div>
+                <label>Hero slayt süresi (ms)</label>
+                <input id="s_interval" type="number" min="3000" step="500" />
+              </div>
+            </div>
+            <label>Hero sırası — listeden ekleyin, oklarla sıralayın</label>
+            <div id="s_hero_ui" class="hero-picker-ui"></div>
+            <button type="button" class="btn btn-ghost btn-sm" id="btnHeroClear" style="margin-top: 0.5rem">
+              Hero seçimini temizle
+            </button>
+            <label style="margin-top: 1rem">En Çok İzlenenler (en fazla 10 video)</label>
+            <div id="s_most_ui" class="hero-picker-ui"></div>
+            <button type="button" class="btn btn-ghost btn-sm" id="btnMostClear" style="margin-top: 0.5rem">
+              En Çok İzlenenler listesini temizle
+            </button>
+            <button type="button" class="btn btn-primary" id="btnSaveSettings" style="margin-top: 1rem">Kaydet</button>
+            <p class="field-hint" style="margin-top: 0.75rem">
+              Yukarıdaki sıra soldan sağa / üstten alta afiş döngüsüdür. Hiç seçim yoksa sitede “öne çıkan”
+              işaretli içerikler kullanılır.
+            </p>
+          </div>
+        </section>
+
+        <section id="tab-cats" class="hidden">
+          <div class="admin-header" style="margin-bottom: 0.75rem">
+            <h2 style="margin: 0; font-size: 1rem">Kategori oluştur</h2>
+            <button type="button" class="btn btn-ghost" id="btnCatReset">Formu temizle</button>
+          </div>
+          <div class="card">
+            <label>Görünen isim <span style="color: var(--accent)">*</span></label>
+            <input id="c_name" placeholder="Örn: Gece maratonu" />
+            <div class="grid-2">
+              <div>
+                <label>Teknik ID <span style="color: var(--muted); font-weight: 400">(isteğe bağlı)</span></label>
+                <input id="c_id" placeholder="Boş bırakılırsa isimden otomatik üretilir" />
+                <p class="field-hint">İsterseniz kendiniz yazın; yoksa Türkçe isimden güvenli bir anahtar oluşturulur.</p>
+              </div>
+              <div>
+                <label>Sıra</label>
+                <input id="c_order" type="number" value="0" />
+              </div>
+            </div>
+            <label style="display: flex; align-items: center; gap: 0.5rem; text-transform: none">
+              <input id="c_visible" type="checkbox" checked style="width: auto" />
+              Listede göster
+            </label>
+            <div class="row-actions" style="margin-top: 0.75rem">
+              <button type="button" class="btn btn-primary" id="btnSaveCat">Kategori kaydet</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Ad</th>
+                  <th>Sıra</th>
+                  <th>Görünür</th>
+                  <th style="min-width: 140px"></th>
+                </tr>
+              </thead>
+              <tbody id="catsBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="tab-content" class="hidden">
+          <div class="admin-header" style="margin-bottom: 0.75rem">
+            <button type="button" class="btn btn-primary" id="btnNewContent">Yeni içerik</button>
+          </div>
+          <div id="editor" class="card hidden">
+            <h3 style="margin-top: 0" id="editorTitle">İçerik</h3>
+            <input type="hidden" id="e_id" />
+            <label>Başlık</label>
+            <input id="e_title" />
+            <label>Açıklama</label>
+            <textarea id="e_desc"></textarea>
+            <div class="grid-2">
+              <div>
+                <label>Afiş (poster) URL</label>
+                <input id="e_poster" />
+              </div>
+              <div>
+                <label>Arka plan (backdrop) URL</label>
+                <input id="e_back" />
+              </div>
+            </div>
+            <div class="grid-2">
+              <div>
+                <label>Yıl</label>
+                <input id="e_year" />
+              </div>
+              <div>
+                <label>Yaş sınırı etiketi</label>
+                <input id="e_mat" placeholder="18+, TV-MA" />
+              </div>
+            </div>
+            <div class="grid-2">
+              <div>
+                <label>Bunny Kütüphane ID</label>
+                <input id="e_lib" />
+              </div>
+              <div>
+                <label>Bunny Video ID</label>
+                <input id="e_vid" />
+              </div>
+            </div>
+            <div class="grid-2">
+              <div>
+                <label>Süre (örn: 24:05)</label>
+                <input id="e_dur" type="text" maxlength="12" placeholder="Örn: 24:05" />
+              </div>
+            </div>
+            <div class="card" style="margin: 0.5rem 0 0.75rem; padding: 0.85rem">
+              <div class="admin-header" style="margin: 0 0 0.65rem">
+                <h4 style="margin: 0; font-size: 0.95rem">Bölümler (opsiyonel)</h4>
+                <button type="button" class="btn btn-ghost" id="btnAddEpisode">+ Bölüm ekle</button>
+              </div>
+              <p class="field-hint" style="margin: 0 0 0.75rem">
+                Bu alan boşsa içerik tek video olarak oynar. Bölüm eklerseniz kullanıcılar bölüm listesinden seçebilir.
+              </p>
+              <div id="e_episodes" class="episode-list"></div>
+            </div>
+            <label>Kategoriler — isme tıklayarak seçin</label>
+            <div id="e_cat_picker" class="cat-picker" role="group" aria-label="Kategoriler"></div>
+            <div class="grid-2">
+              <div>
+                <label>Liste sırası</label>
+                <input id="e_order" type="number" value="0" />
+              </div>
+              <div>
+                <label>Öne çıkan sıra (opsiyonel)</label>
+                <input id="e_forder" type="number" value="0" />
+              </div>
+            </div>
+            <label style="display: flex; align-items: center; gap: 0.5rem; text-transform: none">
+              <input id="e_feat" type="checkbox" style="width: auto" />
+              Öne çıkan (hero yedek listesi)
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.5rem; text-transform: none">
+              <input id="e_pro" type="checkbox" style="width: auto" />
+              Plus içerik
+            </label>
+            <div class="row-actions" style="margin-top: 0.75rem">
+              <button type="button" class="btn btn-primary" id="btnSaveContent">Kaydet</button>
+              <button type="button" class="btn btn-ghost" id="btnCancelContent">İptal</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Anahtar</th>
+                  <th>Başlık</th>
+                  <th>Bölüm</th>
+                  <th>Plus</th>
+                  <th>Bunny</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="contentBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="tab-users" class="hidden">
+          <p style="color: var(--muted); font-size: 0.9rem">
+            Yalnızca en az bir kez giriş yapmış kullanıcılar listelenir.
+          </p>
+          <div class="card">
+            <label>Seçili kullanıcılar için hızlı işlem</label>
+            <div class="row-actions">
+              <button type="button" class="btn btn-ghost" id="btnSelectAllUsers">Tümünü seç</button>
+              <button type="button" class="btn btn-ghost" id="btnClearUsersSelection">Seçimi temizle</button>
+              <button type="button" class="btn btn-primary" id="btnGrantPro">Seçilileri Plus yap</button>
+              <button type="button" class="btn btn-ghost" id="btnRevokePro">Seçililerden Plus kaldır</button>
+            </div>
+            <p id="usersInfo" class="field-hint" style="margin-top: 0.35rem"></p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 44px"></th>
+                  <th>UID</th>
+                  <th>Ad</th>
+                  <th>E-posta</th>
+                  <th>Plus</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="usersBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="tab-bans" class="hidden">
+          <p style="color: var(--muted); font-size: 0.9rem">
+            Yorumdan engellenen kullanıcıları buradan yönetebilirsiniz.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>UID</th>
+                  <th>Ad</th>
+                  <th>E-posta</th>
+                  <th>Durum</th>
+                  <th>Engel tarihi</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="bansBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/core.js"></script>
+    <script src="../js/data-service.js"></script>
+    <script src="admin-app.js"></script>
+  </body>
+</html>
