@@ -134,7 +134,8 @@
     $("btnRegister").addEventListener("click", register);
     $("btnToLogin").addEventListener("click", () => {
       clearDraft();
-      window.location.href = "index.html";
+      const email = encodeURIComponent(($("regEmail").value || "").trim());
+      window.location.href = "index.html?auth=login&email=" + email;
     });
   });
 })();

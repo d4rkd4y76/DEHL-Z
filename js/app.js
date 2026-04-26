@@ -1445,6 +1445,10 @@
   }
 
   function wireAuth() {
+    const goRegisterPage = () => {
+      const email = encodeURIComponent(($("em").value || "").trim());
+      window.location.href = "register.html?email=" + email;
+    };
     $("btnLogin").addEventListener("click", () => {
       $("authErr").style.display = "none";
       $("authModal").classList.add("open");
@@ -1470,10 +1474,8 @@
         $("authErr").style.display = "block";
       }
     });
-    $("doRegister").addEventListener("click", () => {
-      const email = encodeURIComponent(($("em").value || "").trim());
-      window.location.href = "register.html?email=" + email;
-    });
+    if ($("doRegister")) $("doRegister").addEventListener("click", goRegisterPage);
+    if ($("authSwitchRegister")) $("authSwitchRegister").addEventListener("click", goRegisterPage);
     $("btnForgotPw").addEventListener("click", async () => {
       clearRecoveryMessages();
       $("authErr").style.display = "none";
@@ -1625,6 +1627,17 @@
     wireCategoriesMenu();
     wireNavScroll();
     wireAuth();
+    try {
+      const url = new URL(window.location.href);
+      if ((url.searchParams.get("auth") || "").toLowerCase() === "login") {
+        const emailFromUrl = (url.searchParams.get("email") || "").trim();
+        if (emailFromUrl && $("em")) $("em").value = emailFromUrl;
+        $("authErr").style.display = "none";
+        $("authModal").classList.add("open");
+      }
+    } catch (_e) {
+      // ignore malformed URL states
+    }
     wireSearch();
     wireHero();
     try {

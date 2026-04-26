@@ -72,7 +72,7 @@
           <span id="proChip" class="pro-badge pro-badge-nav" style="display: none" aria-label="Plus üyelik">+PLUS</span>
         </div>
         <div class="nav-buttons">
-          <button type="button" class="btn btn-ghost" id="btnLogin">Giriş</button>
+          <button type="button" class="btn btn-ghost btn-auth-entry" id="btnLogin">Giriş / Kayıt Ol</button>
           <button type="button" class="btn btn-ghost" id="btnProfile" style="display: none">Profil</button>
           <button type="button" class="btn btn-primary" id="btnLogout" style="display: none">Çıkış</button>
         </div>
@@ -122,6 +122,10 @@
         </div>
         <div class="modal-body">
           <p style="margin-top: 0">E-posta ile giriş veya kayıt.</p>
+          <div class="auth-switch" role="tablist" aria-label="Hesap işlemleri">
+            <button type="button" class="auth-switch-btn is-active" aria-selected="true">Giriş</button>
+            <button type="button" class="auth-switch-btn" id="authSwitchRegister" aria-selected="false">Kayıt Ol</button>
+          </div>
           <label for="em">E-posta</label>
           <input id="em" type="email" autocomplete="email" />
           <label for="pw">Şifre</label>
@@ -132,7 +136,6 @@
           <p id="authErr" class="msg msg-error" style="display: none"></p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-ghost" id="doRegister">Kayıt ekranı</button>
           <button type="button" class="btn btn-primary" id="doLogin">Giriş yap</button>
         </div>
       </div>

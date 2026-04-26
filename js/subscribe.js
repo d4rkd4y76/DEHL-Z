@@ -156,7 +156,7 @@
         '<p class="status-sub">' +
         renewText +
         "</p>" +
-        '<ol class="sub-step-list"><li>+PLUS videoları sınırsız açabilirsiniz.</li><li>İçerikleri listenize ekleyip kişisel arşivinizi oluşturabilirsiniz.</li><li>Arka planda dinleme ayrıcalığınız aktif olur.</li></ol>' +
+        '<ol class="sub-step-list"><li>+PLUS videoları sınırsız açabilirsiniz.</li><li>İçerikleri listenize ekleyip kişisel arşivinizi oluşturabilirsiniz.</li><li>Arka planda dinleme ayrıcalığınız aktif olur.</li><li>Sıfır reklam deneyimiyle içerikleri kesintisiz izlersiniz.</li></ol>' +
         statusActionsHtml({ showRenew: true, showManage: true, requireConsent: true }) +
         supportLinksHtml() +
         "</div>";
@@ -172,7 +172,7 @@
       (status === "past_due" ? ' <span class="status-chip pending">ÖDEME BAŞARISIZ</span>' : "") +
       "</p>" +
       '<p class="status-sub">+PLUS\'a geçmek için tek adım yeterli. Ödemeyi tamamladığınız anda ayrıcalıklarınız otomatik açılır.</p>' +
-      '<ol class="sub-step-list"><li>"+PLUS\'a abone ol" butonuna tıklayın.</li><li>Ödeme ekranında kart bilgilerinizi girip işlemi tamamlayın.</li><li>İşlem onaylandıktan sonra +PLUS videoları, liste ve arka plan dinleme özellikleri açılır.</li></ol>' +
+      '<ol class="sub-step-list"><li>"+PLUS\'a abone ol" butonuna tıklayın.</li><li>Ödeme ekranında kart bilgilerinizi girip işlemi tamamlayın.</li><li>İşlem onaylandıktan sonra +PLUS videoları, liste, arka plan dinleme ve sıfır reklam özellikleri açılır.</li></ol>' +
       statusActionsHtml({ showSubscribe: true, showManage: true, requireConsent: true }) +
       (!paddleClientToken || !paddlePriceIdMonthly
         ? '<p class="sub-note">Abonelik sistemi kısa süre içinde aktif ediliyor. Lütfen biraz sonra tekrar deneyin.</p>'

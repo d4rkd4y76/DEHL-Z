@@ -630,6 +630,12 @@ button {
   background: rgba(255, 255, 255, 0.12);
 }
 
+.btn-auth-entry {
+  min-width: 132px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
 .btn-list {
   background: linear-gradient(145deg, rgba(26, 30, 36, 0.94), rgba(17, 22, 28, 0.94));
   color: #dbe7f3;
@@ -1740,6 +1746,36 @@ main {
   gap: 0.6rem;
   flex-wrap: wrap;
   margin: -0.25rem 0 0.55rem;
+}
+
+.auth-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  margin: 0.35rem 0 0.8rem;
+}
+
+.auth-switch-btn {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #d4d4d8;
+  border-radius: 9px;
+  min-height: 36px;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-switch-btn.is-active {
+  background: rgba(220, 38, 38, 0.16);
+  border-color: rgba(220, 38, 38, 0.45);
+  color: #fca5a5;
+}
+
+.auth-switch-btn:not(.is-active):hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
 }
 
 .auth-link-btn {
