@@ -218,6 +218,38 @@
     });
   }
 
+  function wirePlanCarousel() {
+    const grid = $("planGrid");
+    const prev = $("planPrevBtn");
+    const next = $("planNextBtn");
+    const hint = $("planCarouselHint");
+    if (!grid || !prev || !next) return;
+
+    const step = () => Math.max(240, Math.round(grid.clientWidth * 0.86));
+
+    const update = () => {
+      const max = Math.max(0, grid.scrollWidth - grid.clientWidth);
+      const left = Math.max(0, Math.round(grid.scrollLeft));
+      prev.disabled = left <= 4;
+      next.disabled = left >= max - 4;
+      if (hint) {
+        if (max <= 6) hint.textContent = "Tüm paketler görünüyor.";
+        else if (next.disabled) hint.textContent = "Tüm paketleri gördünüz.";
+        else hint.textContent = "Sağa sola kaydırarak avantajlı paketleri gör.";
+      }
+    };
+
+    prev.addEventListener("click", () => {
+      grid.scrollBy({ left: -step(), behavior: "smooth" });
+    });
+    next.addEventListener("click", () => {
+      grid.scrollBy({ left: step(), behavior: "smooth" });
+    });
+    grid.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  }
+
   function wireAuth() {
     $("btnLogin").addEventListener("click", () => {
       $("authErr").style.display = "none";
@@ -255,5 +287,6 @@
     modals();
     wireAuth();
     wireShopierButtons();
+    wirePlanCarousel();
   });
 })();
