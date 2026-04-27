@@ -4,6 +4,7 @@
   const supportEmail = String(cfg.supportEmail || "destek.dehliz@gmail.com").trim();
   const LEGAL_POLICY_VERSION = "2026-04-27";
   const planMap = cfg.plans || {};
+  let pendingPlanKey = "";
 
   function normalizeBool(v) {
     return v === true || v === 1 || v === "1" || String(v).toLowerCase() === "true";
@@ -85,6 +86,21 @@
     $("authModal").addEventListener("click", (e) => {
       if (e.target === $("authModal")) $("authModal").classList.remove("open");
     });
+    $("purchaseConsentModal").addEventListener("click", (e) => {
+      if (e.target === $("purchaseConsentModal")) $("purchaseConsentModal").classList.remove("open");
+    });
+  }
+
+  function openPurchaseConsent(planKey) {
+    pendingPlanKey = planKey;
+    const planCfg = planMap[planKey] || {};
+    const label = String(planCfg.label || "Seçilen paket");
+    const price = Number(planCfg.priceTl || 0);
+    const months = Number(planCfg.months || 0);
+    $("purchaseConsentPlan").textContent =
+      "Seçilen paket: " + label + " - " + price + " TL (" + months + " ay)";
+    $("billingConsent").checked = false;
+    $("purchaseConsentModal").classList.add("open");
   }
 
   function renderStatus(user, profile) {
@@ -92,7 +108,7 @@
     if (!user) {
       box.innerHTML =
         '<div class="status-card">' +
-        '<p class="status-title">Abonelik durumunu görmek için giriş yapın</p>' +
+        '<p class="status-title">Üyelik durumunu görmek için giriş yapın</p>' +
         '<p class="status-sub">Giriş yaptıktan sonra +PLUS durumunuz, kalan süreniz ve ödeme sonrası aktivasyon bilgileri burada görünür.</p>' +
         '<div class="status-actions"><button type="button" class="btn btn-primary" id="statusLoginBtn">Giriş yap</button></div>' +
         supportLinksHtml() +
@@ -156,32 +172,49 @@
 
   function wireShopierButtons() {
     document.querySelectorAll(".shopier-buy-btn").forEach((btn) => {
-      btn.addEventListener("click", async () => {
+      btn.addEventListener("click", () => {
         const user = dehlizAuth.currentUser;
         if (!user || !user.uid) {
           $("authErr").style.display = "none";
           $("authModal").classList.add("open");
           return;
         }
-        if (!assertConsent()) return;
         const planKey = String(btn.getAttribute("data-plan") || "");
-        const planCfg = planMap[planKey] || null;
-        const checkoutUrl = planCfg ? String(planCfg.checkoutUrl || "").trim() : "";
-        if (!planCfg || !checkoutUrl) {
+        if (!planMap[planKey]) {
           alert("Seçilen planın Shopier bağlantısı henüz tanımlı değil. Yönetici ayarlarını kontrol edin.");
           return;
         }
-        btn.disabled = true;
-        const oldText = btn.textContent;
-        btn.textContent = "Yönlendiriliyor…";
-        try {
-          await saveBillingConsent(user, planKey);
-          window.location.href = buildCheckoutUrl(checkoutUrl, user, planKey, planCfg);
-        } finally {
-          btn.disabled = false;
-          btn.textContent = oldText;
-        }
+        openPurchaseConsent(planKey);
       });
+    });
+
+    $("purchaseConsentContinue").addEventListener("click", async () => {
+      const user = dehlizAuth.currentUser;
+      if (!user || !user.uid) {
+        $("purchaseConsentModal").classList.remove("open");
+        $("authErr").style.display = "none";
+        $("authModal").classList.add("open");
+        return;
+      }
+      if (!assertConsent()) return;
+      const planKey = pendingPlanKey;
+      const planCfg = planMap[planKey] || null;
+      const checkoutUrl = planCfg ? String(planCfg.checkoutUrl || "").trim() : "";
+      if (!planCfg || !checkoutUrl) {
+        alert("Seçilen planın Shopier bağlantısı henüz tanımlı değil. Yönetici ayarlarını kontrol edin.");
+        return;
+      }
+      const continueBtn = $("purchaseConsentContinue");
+      continueBtn.disabled = true;
+      const oldText = continueBtn.textContent;
+      continueBtn.textContent = "Yönlendiriliyor…";
+      try {
+        await saveBillingConsent(user, planKey);
+        window.location.href = buildCheckoutUrl(checkoutUrl, user, planKey, planCfg);
+      } finally {
+        continueBtn.disabled = false;
+        continueBtn.textContent = oldText;
+      }
     });
   }
 

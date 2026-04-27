@@ -19,6 +19,7 @@
         gap: 1rem;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         padding: 0 4% 3.2rem;
+        align-items: stretch;
       }
       @media (max-width: 980px) {
         .sub-grid {
@@ -27,7 +28,9 @@
       }
       @media (max-width: 760px) {
         .sub-grid {
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 0.5rem;
+          padding-bottom: 1.2rem;
         }
       }
       @media (max-width: 720px) {
@@ -46,13 +49,23 @@
           0 20px 54px rgba(0, 0, 0, 0.4),
           inset 0 1px 0 rgba(255, 255, 255, 0.06);
         position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+      .price-card.advantage {
+        border-color: rgba(96, 165, 250, 0.45);
+        box-shadow:
+          0 22px 58px rgba(0, 0, 0, 0.44),
+          0 0 0 1px rgba(96, 165, 250, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
       }
       .price-card.recommended {
         border-color: rgba(250, 204, 21, 0.42);
         box-shadow:
-          0 22px 58px rgba(0, 0, 0, 0.46),
-          0 0 0 1px rgba(250, 204, 21, 0.2),
-          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+          0 28px 66px rgba(0, 0, 0, 0.55),
+          0 0 0 1px rgba(250, 204, 21, 0.28),
+          0 0 24px rgba(250, 204, 21, 0.24),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
       }
       .plan-badge {
         position: absolute;
@@ -66,6 +79,17 @@
         background: rgba(250, 204, 21, 0.16);
         color: #fde68a;
         border: 1px solid rgba(250, 204, 21, 0.52);
+      }
+      .plan-badge.advantage {
+        background: rgba(59, 130, 246, 0.18);
+        border-color: rgba(96, 165, 250, 0.6);
+        color: #bfdbfe;
+      }
+      .plan-badge.best {
+        background: linear-gradient(135deg, rgba(250, 204, 21, 0.24), rgba(234, 179, 8, 0.14));
+        border-color: rgba(250, 204, 21, 0.8);
+        color: #fef08a;
+        box-shadow: 0 6px 16px rgba(250, 204, 21, 0.24);
       }
       .price-card h2 {
         margin: 0 0 0.5rem;
@@ -100,6 +124,9 @@
         width: 100%;
         margin-top: 1rem;
         min-height: 44px;
+      }
+      .price-card .plan-buy-btn {
+        margin-top: auto;
       }
       .plus-badges {
         display: flex;
@@ -263,6 +290,60 @@
         background: rgba(255, 255, 255, 0.03);
         padding: 0.95rem 1rem;
       }
+      .purchase-consent-plan {
+        margin: 0.2rem 0 0.8rem;
+        color: #e4e4e7;
+        font-size: 0.9rem;
+      }
+      @media (max-width: 760px) {
+        .price-card {
+          padding: 0.7rem 0.55rem 0.65rem;
+          border-radius: 12px;
+        }
+        .plan-badge {
+          top: -10px;
+          right: 8px;
+          padding: 0.2rem 0.45rem;
+          font-size: 0.58rem;
+          letter-spacing: 0.04em;
+        }
+        .price-card h2 {
+          font-size: 0.93rem;
+          margin-bottom: 0.25rem;
+        }
+        .price-card .amt {
+          font-size: 1.38rem;
+          line-height: 1.1;
+        }
+        .price-sub {
+          font-size: 0.74rem;
+          margin: 0.2rem 0 0.45rem;
+          line-height: 1.35;
+        }
+        .plus-badges {
+          margin: 0.35rem 0 0.35rem;
+          gap: 0.28rem;
+        }
+        .plus-badge {
+          padding: 0.22rem 0.33rem;
+          font-size: 0.56rem;
+          letter-spacing: 0;
+        }
+        .feat {
+          margin-top: 0.35rem;
+          font-size: 0.67rem;
+          line-height: 1.35;
+        }
+        .feat li {
+          margin-bottom: 0.12rem;
+        }
+        .plan-buy-btn {
+          margin-top: 0.5rem;
+          min-height: 32px;
+          padding: 0.35rem 0.2rem;
+          font-size: 0.68rem;
+        }
+      }
     </style>
   </head>
   <body>
@@ -310,13 +391,16 @@
         </div>
         <ul class="feat">
           <li>30 gün +PLUS erişimi</li>
-          <li>Kişisel liste oluşturma</li>
-          <li>Reklamsız ve kesintisiz izleme</li>
+          <li>+PLUS videolara tam erişim</li>
+          <li>Listene ekle / kişisel arşiv</li>
+          <li>Arka planda oynatma</li>
+          <li>Reklamsız deneyim</li>
         </ul>
         <button type="button" class="btn btn-primary plan-buy-btn shopier-buy-btn" data-plan="plus_1m">1 Aylık Al</button>
       </div>
 
-      <div class="price-card">
+      <div class="price-card advantage">
+        <span class="plan-badge advantage">AVANTAJLI</span>
         <h2>2 Aylık +PLUS</h2>
         <p class="amt">200 ₺</p>
         <p class="price-sub">Fiyat avantajı isteyenler için daha dengeli paket.</p>
@@ -328,14 +412,16 @@
         </div>
         <ul class="feat">
           <li>60 gün +PLUS erişimi</li>
-          <li>Daha uzun süre tek ödeme</li>
-          <li>Reklamsız ve kesintisiz izleme</li>
+          <li>+PLUS videolara tam erişim</li>
+          <li>Listene ekle / kişisel arşiv</li>
+          <li>Arka planda oynatma</li>
+          <li>Reklamsız deneyim</li>
         </ul>
         <button type="button" class="btn btn-primary plan-buy-btn shopier-buy-btn" data-plan="plus_2m">2 Aylık Al</button>
       </div>
 
       <div class="price-card recommended">
-        <span class="plan-badge">EN İYİ SEÇENEK</span>
+        <span class="plan-badge best">EN İYİ SEÇENEK</span>
         <h2>3 Aylık +PLUS</h2>
         <p class="amt">250 ₺</p>
         <p class="price-sub">En yüksek fiyat/performans. Uzun süreli +PLUS deneyimi.</p>
@@ -347,25 +433,12 @@
         </div>
         <ul class="feat">
           <li>90 gün +PLUS erişimi</li>
-          <li>En avantajlı süre/fiyat oranı</li>
-          <li>Reklamsız ve kesintisiz izleme</li>
+          <li>+PLUS videolara tam erişim</li>
+          <li>Listene ekle / kişisel arşiv</li>
+          <li>Arka planda oynatma</li>
+          <li>Reklamsız deneyim</li>
         </ul>
         <button type="button" class="btn btn-primary plan-buy-btn shopier-buy-btn" data-plan="plus_3m">3 Aylık Al</button>
-      </div>
-    </div>
-
-    <div class="billing-consent-wrap">
-      <div class="billing-consent-card">
-        <label class="sub-consent" for="billingConsent">
-          <input id="billingConsent" type="checkbox" />
-          <span>
-            <a href="privacy.html" target="_blank" rel="noopener">Gizlilik Politikası</a> ve
-            <a href="refund-policy.html" target="_blank" rel="noopener">İptal/İade Koşulları</a> metinlerini okudum, kabul ediyorum.
-          </span>
-        </label>
-        <p class="sub-note" style="margin-top: 0.8rem">
-          Bu aşamada sistem tek seferlik Shopier ödemesi ile çalışır. Otomatik yenilenen abonelik bulunmaz.
-        </p>
       </div>
     </div>
 
@@ -385,6 +458,32 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-ghost" id="doRegister">Kayıt ekranı</button>
           <button type="button" class="btn btn-primary" id="doLogin">Giriş</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="purchaseConsentModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Üyelik Onayı</h2>
+          <button type="button" class="modal-close" data-close="purchaseConsentModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="purchase-consent-plan" id="purchaseConsentPlan">Seçilen paket: -</p>
+          <label class="sub-consent" for="billingConsent">
+            <input id="billingConsent" type="checkbox" />
+            <span>
+              <a href="privacy.html" target="_blank" rel="noopener">Gizlilik Politikası</a> ve
+              <a href="refund-policy.html" target="_blank" rel="noopener">Üyelik İptal/İade Koşulları</a> metinlerini okudum, kabul ediyorum.
+            </span>
+          </label>
+          <p class="sub-note" style="margin-top: 0.8rem">
+            Bu ödeme tek seferlik üyelik paketidir. Otomatik yenileme yapılmaz.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-close="purchaseConsentModal">Vazgeç</button>
+          <button type="button" class="btn btn-primary" id="purchaseConsentContinue">Devam et</button>
         </div>
       </div>
     </div>
