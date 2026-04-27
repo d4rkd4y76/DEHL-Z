@@ -15,11 +15,27 @@ window.DEHLIZ_CONFIG = window.DEHLIZ_CONFIG || {
   },
   bunnyEmbedBase: "https://iframe.mediadelivery.net/embed",
   recoveryApiBase: "https://europe-west1-dehliz-a95cd.cloudfunctions.net",
-  paddle: {
-    plusMonthlyPriceTl: 120,
-    clientToken: "",
-    priceIdMonthly: "",
-    sellerName: "DEHLİZ",
-    supportEmail: "destek.dehliz@gmail.com"
+  shopier: {
+    supportEmail: "destek.dehliz@gmail.com",
+    plans: {
+      plus_1m: {
+        label: "1 Aylık +PLUS",
+        months: 1,
+        priceTl: 120,
+        checkoutUrl: ""
+      },
+      plus_2m: {
+        label: "2 Aylık +PLUS",
+        months: 2,
+        priceTl: 200,
+        checkoutUrl: ""
+      },
+      plus_3m: {
+        label: "3 Aylık +PLUS",
+        months: 3,
+        priceTl: 250,
+        checkoutUrl: ""
+      }
+    }
   }
 };

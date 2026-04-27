@@ -1,13 +1,9 @@
-(function () {
+;(function () {
   const $ = (id) => document.getElementById(id);
-  const cfg = (window.DEHLIZ_CONFIG && window.DEHLIZ_CONFIG.paddle) || {};
-  const plusPriceTl = Number(cfg.plusMonthlyPriceTl || 120);
-  const paddleClientToken = String(cfg.clientToken || "").trim();
-  const paddlePriceIdMonthly = String(cfg.priceIdMonthly || "").trim();
-  const paddleSellerName = String(cfg.sellerName || "DEHLİZ").trim();
-  const supportEmail = String(cfg.supportEmail || "").trim();
-  const LEGAL_POLICY_VERSION = "2026-04-26";
-  let paddleReady = false;
+  const cfg = (window.DEHLIZ_CONFIG && window.DEHLIZ_CONFIG.shopier) || {};
+  const supportEmail = String(cfg.supportEmail || "destek.dehliz@gmail.com").trim();
+  const LEGAL_POLICY_VERSION = "2026-04-27";
+  const planMap = cfg.plans || {};
 
   function normalizeBool(v) {
     return v === true || v === 1 || v === "1" || String(v).toLowerCase() === "true";
@@ -36,24 +32,6 @@
     return d.toLocaleDateString("tr-TR");
   }
 
-  function statusActionsHtml(opts) {
-    const out = [];
-    if (opts.showLogin) out.push('<button type="button" class="btn btn-primary" id="statusLoginBtn">Giriş yap</button>');
-    if (opts.showSubscribe) out.push('<button type="button" class="btn btn-primary" id="startPaddleCheckoutBtn">+PLUS\'a abone ol</button>');
-    if (opts.showRenew) out.push('<button type="button" class="btn btn-primary" id="renewPaddleCheckoutBtn">Aboneliği yenile</button>');
-    if (opts.requireConsent) {
-      out.push(
-        '<label class="sub-consent" for="billingConsent">' +
-          '<input id="billingConsent" type="checkbox" />' +
-          '<span><a href="privacy.html" target="_blank" rel="noopener">Gizlilik Politikası</a> ve <a href="refund-policy.html" target="_blank" rel="noopener">İptal/İade Koşulları</a> metinlerini okudum, kabul ediyorum.</span>' +
-        "</label>"
-      );
-    }
-    if (opts.showManage) out.push('<p class="sub-help" style="margin:0.55rem 0 0">Plan değişikliği ve iptal işlemleri için destek ekibiyle iletişime geçebilirsiniz.</p>');
-    if (!out.length) return "";
-    return '<div class="status-actions">' + out.join("") + "</div>";
-  }
-
   function supportLinksHtml() {
     const links = [];
     if (supportEmail) links.push('<a href="mailto:' + escapeAttr(supportEmail) + '">' + escape(supportEmail) + "</a>");
@@ -61,48 +39,41 @@
     return '<p class="sub-help">Destek: ' + links.join(" · ") + "</p>";
   }
 
-  function initPaddle() {
-    if (paddleReady) return true;
-    if (!window.Paddle || !paddleClientToken) return false;
-    try {
-      window.Paddle.Initialize({
-        token: paddleClientToken,
-        checkout: {
-          locale: "tr"
-        }
-      });
-      paddleReady = true;
-      return true;
-    } catch (_e) {
-      paddleReady = false;
-      return false;
-    }
+  function selectedConsent() {
+    const el = $("billingConsent");
+    return !!(el && el.checked);
   }
 
-  async function openPaddleCheckout(user) {
-    if (!user || !user.uid) {
-      alert("Abonelik başlatmak için önce giriş yapın.");
-      return;
-    }
-    if (!paddlePriceIdMonthly) {
-      alert("Paddle fiyat planı henüz tanımlı değil. Yönetici ayarlarını kontrol edin.");
-      return;
-    }
-    if (!initPaddle()) {
-      alert("Ödeme ekranı başlatılamadı. Lütfen daha sonra tekrar deneyin.");
-      return;
-    }
-    window.Paddle.Checkout.open({
-      items: [{ priceId: paddlePriceIdMonthly, quantity: 1 }],
-      customData: {
-        firebaseUid: user.uid,
-        source: "dehliz_subscribe_page",
-        plan: "plus_monthly"
-      },
-      customer: {
-        email: user.email || undefined
-      }
+  function assertConsent() {
+    if (selectedConsent()) return true;
+    alert("Devam etmek için Gizlilik Politikası ve İptal/İade Koşulları onayını vermelisiniz.");
+    return false;
+  }
+
+  async function saveBillingConsent(user, planKey) {
+    if (!user || !user.uid) return;
+    await DataService.userRef(user.uid).child("legalConsents").update({
+      shopierAccepted: true,
+      shopierAcceptedAt: Date.now(),
+      selectedPlan: planKey,
+      privacyVersion: LEGAL_POLICY_VERSION,
+      refundVersion: LEGAL_POLICY_VERSION
     });
+  }
+
+  function buildCheckoutUrl(base, user, planKey, planCfg) {
+    try {
+      const u = new URL(base);
+      u.searchParams.set("uid", user.uid || "");
+      u.searchParams.set("email", user.email || "");
+      u.searchParams.set("plan", planKey);
+      u.searchParams.set("months", String(Number(planCfg.months || 0)));
+      u.searchParams.set("price", String(Number(planCfg.priceTl || 0)));
+      u.searchParams.set("source", "dehliz_subscribe_page");
+      return u.toString();
+    } catch (_e) {
+      return base;
+    }
   }
 
   function modals() {
@@ -118,14 +89,12 @@
 
   function renderStatus(user, profile) {
     const box = $("statusBox");
-    const priceEl = $("plusPriceText");
-    if (priceEl) priceEl.textContent = plusPriceTl + " ₺";
     if (!user) {
       box.innerHTML =
         '<div class="status-card">' +
         '<p class="status-title">Abonelik durumunu görmek için giriş yapın</p>' +
-        '<p class="status-sub">Giriş yaptıktan sonra +PLUS durumunuz, yenileme tarihiniz ve abonelik işlemleriniz burada görünecek.</p>' +
-        statusActionsHtml({ showLogin: true }) +
+        '<p class="status-sub">Giriş yaptıktan sonra +PLUS durumunuz, kalan süreniz ve ödeme sonrası aktivasyon bilgileri burada görünür.</p>' +
+        '<div class="status-actions"><button type="button" class="btn btn-primary" id="statusLoginBtn">Giriş yap</button></div>' +
         supportLinksHtml() +
         "</div>";
       const loginBtn = $("statusLoginBtn");
@@ -137,17 +106,16 @@
       }
       return;
     }
-    const sub = (profile && profile.subscription) || {};
+
     const pro = normalizeBool(profile && profile.isPro);
     const renewAt = readRenewalAt(profile);
     const left = daysUntil(renewAt);
-    const status = String(sub.status || "").toLowerCase();
 
     if (pro) {
       const renewText =
         renewAt && left != null
-          ? "Bir sonraki yenileme: " + fmtDate(renewAt) + " (" + (left >= 0 ? left + " gün kaldı" : "süresi doldu") + ")"
-          : "Yenileme tarihi kısa süre içinde abonelik bilgilerinizde görüntülenecektir.";
+          ? "Erişim bitiş tarihi: " + fmtDate(renewAt) + " (" + (left >= 0 ? left + " gün kaldı" : "süresi doldu") + ")"
+          : "Erişim bitiş tarihi kısa süre içinde profilinizde görüntülenecektir.";
       box.innerHTML =
         '<div class="status-card">' +
         '<p class="status-title">Hesap: ' +
@@ -157,10 +125,9 @@
         renewText +
         "</p>" +
         '<ol class="sub-step-list"><li>+PLUS videoları sınırsız açabilirsiniz.</li><li>İçerikleri listenize ekleyip kişisel arşivinizi oluşturabilirsiniz.</li><li>Arka planda dinleme ayrıcalığınız aktif olur.</li><li>Sıfır reklam deneyimiyle içerikleri kesintisiz izlersiniz.</li></ol>' +
-        statusActionsHtml({ showRenew: true, showManage: true, requireConsent: true }) +
+        '<p class="sub-help" style="margin:0.55rem 0 0">Sürenizi uzatmak için aşağıdaki Shopier paketlerinden birini tekrar satın alabilirsiniz.</p>' +
         supportLinksHtml() +
         "</div>";
-      wireCheckoutButtons(user);
       return;
     }
 
@@ -168,18 +135,11 @@
       '<div class="status-card">' +
       '<p class="status-title">Hesap: ' +
       escape(user.email) +
-      '</p><p class="status-sub"><span class="status-chip free">STANDART ÜYELİK</span>' +
-      (status === "past_due" ? ' <span class="status-chip pending">ÖDEME BAŞARISIZ</span>' : "") +
-      "</p>" +
-      '<p class="status-sub">+PLUS\'a geçmek için tek adım yeterli. Ödemeyi tamamladığınız anda ayrıcalıklarınız otomatik açılır.</p>' +
-      '<ol class="sub-step-list"><li>"+PLUS\'a abone ol" butonuna tıklayın.</li><li>Ödeme ekranında kart bilgilerinizi girip işlemi tamamlayın.</li><li>İşlem onaylandıktan sonra +PLUS videoları, liste, arka plan dinleme ve sıfır reklam özellikleri açılır.</li></ol>' +
-      statusActionsHtml({ showSubscribe: true, showManage: true, requireConsent: true }) +
-      (!paddleClientToken || !paddlePriceIdMonthly
-        ? '<p class="sub-note">Abonelik sistemi kısa süre içinde aktif ediliyor. Lütfen biraz sonra tekrar deneyin.</p>'
-        : "") +
+      '</p><p class="status-sub"><span class="status-chip free">STANDART ÜYELİK</span></p>' +
+      '<p class="status-sub">Aşağıdaki Shopier paketlerinden birini seçip tek seferlik ödeme yaptığınızda +PLUS erişiminiz seçilen süre boyunca aktif edilir.</p>' +
+      '<ol class="sub-step-list"><li>Paketi seçin.</li><li>Shopier ödeme adımını tamamlayın.</li><li>Ödeme onaylandığında hesap süreniz aktif edilir.</li></ol>' +
       supportLinksHtml() +
       "</div>";
-    wireCheckoutButtons(user);
   }
 
   function escape(s) {
@@ -194,41 +154,35 @@
     return escape(s).replace(/'/g, "&#39;");
   }
 
-  function wireCheckoutButtons(user) {
-    const readBillingConsent = () => {
-      const el = $("billingConsent");
-      return !!(el && el.checked);
-    };
-    const ensureBillingConsent = () => {
-      if (readBillingConsent()) return true;
-      alert("Devam etmek için Gizlilik Politikası ve İptal/İade Koşulları onayını vermelisiniz.");
-      return false;
-    };
-    const saveBillingConsent = async () => {
-      if (!user || !user.uid) return;
-      await DataService.userRef(user.uid).child("legalConsents").update({
-        subscriptionAccepted: true,
-        subscriptionAcceptedAt: Date.now(),
-        privacyVersion: LEGAL_POLICY_VERSION,
-        refundVersion: LEGAL_POLICY_VERSION
+  function wireShopierButtons() {
+    document.querySelectorAll(".shopier-buy-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const user = dehlizAuth.currentUser;
+        if (!user || !user.uid) {
+          $("authErr").style.display = "none";
+          $("authModal").classList.add("open");
+          return;
+        }
+        if (!assertConsent()) return;
+        const planKey = String(btn.getAttribute("data-plan") || "");
+        const planCfg = planMap[planKey] || null;
+        const checkoutUrl = planCfg ? String(planCfg.checkoutUrl || "").trim() : "";
+        if (!planCfg || !checkoutUrl) {
+          alert("Seçilen planın Shopier bağlantısı henüz tanımlı değil. Yönetici ayarlarını kontrol edin.");
+          return;
+        }
+        btn.disabled = true;
+        const oldText = btn.textContent;
+        btn.textContent = "Yönlendiriliyor…";
+        try {
+          await saveBillingConsent(user, planKey);
+          window.location.href = buildCheckoutUrl(checkoutUrl, user, planKey, planCfg);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = oldText;
+        }
       });
-    };
-    const subscribeBtn = $("startPaddleCheckoutBtn");
-    if (subscribeBtn) {
-      subscribeBtn.addEventListener("click", async () => {
-        if (!ensureBillingConsent()) return;
-        await saveBillingConsent();
-        await openPaddleCheckout(user);
-      });
-    }
-    const renewBtn = $("renewPaddleCheckoutBtn");
-    if (renewBtn) {
-      renewBtn.addEventListener("click", async () => {
-        if (!ensureBillingConsent()) return;
-        await saveBillingConsent();
-        await openPaddleCheckout(user);
-      });
-    }
+    });
   }
 
   function wireAuth() {
@@ -267,5 +221,6 @@
   document.addEventListener("DOMContentLoaded", () => {
     modals();
     wireAuth();
+    wireShopierButtons();
   });
 })();

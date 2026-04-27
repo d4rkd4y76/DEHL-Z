@@ -13,17 +13,19 @@
           var(--bg);
       }
       .sub-grid {
-        max-width: 980px;
+        max-width: 1120px;
         margin: 0 auto;
         display: grid;
         gap: 1rem;
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         padding: 0 4% 3.2rem;
       }
-      .sub-grid.single {
-        grid-template-columns: 1fr;
+      @media (max-width: 980px) {
+        .sub-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
       }
-      @media (max-width: 800px) {
+      @media (max-width: 760px) {
         .sub-grid {
           grid-template-columns: 1fr;
         }
@@ -43,6 +45,27 @@
         box-shadow:
           0 20px 54px rgba(0, 0, 0, 0.4),
           inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        position: relative;
+      }
+      .price-card.recommended {
+        border-color: rgba(250, 204, 21, 0.42);
+        box-shadow:
+          0 22px 58px rgba(0, 0, 0, 0.46),
+          0 0 0 1px rgba(250, 204, 21, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+      .plan-badge {
+        position: absolute;
+        top: -12px;
+        right: 12px;
+        border-radius: 999px;
+        padding: 0.28rem 0.66rem;
+        font-size: 0.7rem;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        background: rgba(250, 204, 21, 0.16);
+        color: #fde68a;
+        border: 1px solid rgba(250, 204, 21, 0.52);
       }
       .price-card h2 {
         margin: 0 0 0.5rem;
@@ -72,6 +95,11 @@
         content: "✓ ";
         color: #22c55e;
         font-weight: 700;
+      }
+      .plan-buy-btn {
+        width: 100%;
+        margin-top: 1rem;
+        min-height: 44px;
       }
       .plus-badges {
         display: flex;
@@ -224,6 +252,17 @@
         font-size: 0.9rem;
         line-height: 1.58;
       }
+      .billing-consent-wrap {
+        max-width: 1120px;
+        margin: 0 auto 2.2rem;
+        padding: 0 4%;
+      }
+      .billing-consent-card {
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 0.95rem 1rem;
+      }
     </style>
   </head>
   <body>
@@ -252,17 +291,17 @@
     <section class="sub-hero">
       <h1 style="font-size: clamp(2rem, 4vw, 2.75rem); margin: 0 0 0.5rem">DEHLİZ +Plus</h1>
       <p style="color: var(--muted); max-width: 560px; line-height: 1.6; margin: 0">
-        +PLUS ile kilitli içeriklere eriş, kendi listeni oluştur, içerikleri arka planda dinle, sıfır reklam ile kesintisiz bir deneyim yaşa.
+        Shopier ile tek seferlik ödeme yap, seçtiğin süre boyunca +PLUS ayrıcalıklarını hemen kullan.
       </p>
     </section>
 
     <div class="status-box" id="statusBox"></div>
 
-    <div class="sub-grid single">
+    <div class="sub-grid" id="planGrid">
       <div class="price-card">
-        <h2>+Plus Aylık Plan</h2>
-        <p class="amt" id="plusPriceText">120 ₺</p>
-        <p class="price-sub">Aylık yenilenen üyelik ile tüm +PLUS ayrıcalıklarına anında erişim.</p>
+        <h2>1 Aylık +PLUS</h2>
+        <p class="amt">120 ₺</p>
+        <p class="price-sub">Kısa süreli +PLUS erişimi için hızlı başlangıç paketi.</p>
         <div class="plus-badges" aria-label="+PLUS avantaj rozetleri">
           <span class="plus-badge ads-free">REKLAMSIZ</span>
           <span class="plus-badge bg-play">ARKA PLANDA OYNATMA</span>
@@ -270,15 +309,63 @@
           <span class="plus-badge my-list">LİSTENE EKLE</span>
         </div>
         <ul class="feat">
-          <li>+PLUS etiketli tüm videolara erişim</li>
-          <li>Listene ekle / listenden çıkar ile kişisel arşiv</li>
-          <li>Arka planda dinleme ayrıcalığı</li>
-          <li>Sıfır reklam deneyimi</li>
-          <li>Yenileme tarihi ve üyelik durumunu tek ekranda takip</li>
+          <li>30 gün +PLUS erişimi</li>
+          <li>Kişisel liste oluşturma</li>
+          <li>Reklamsız ve kesintisiz izleme</li>
         </ul>
-        <div class="sub-note">
-          Ödeme tamamlandığında üyeliğiniz otomatik olarak güncellenir. Her ay manuel yenileme bağlantısıyla uğraşmanıza gerek kalmaz.
+        <button type="button" class="btn btn-primary plan-buy-btn shopier-buy-btn" data-plan="plus_1m">1 Aylık Al</button>
+      </div>
+
+      <div class="price-card">
+        <h2>2 Aylık +PLUS</h2>
+        <p class="amt">200 ₺</p>
+        <p class="price-sub">Fiyat avantajı isteyenler için daha dengeli paket.</p>
+        <div class="plus-badges" aria-label="+PLUS avantaj rozetleri">
+          <span class="plus-badge ads-free">REKLAMSIZ</span>
+          <span class="plus-badge bg-play">ARKA PLANDA OYNATMA</span>
+          <span class="plus-badge plus-access">+PLUS VİDEOLARA ERİŞİM</span>
+          <span class="plus-badge my-list">LİSTENE EKLE</span>
         </div>
+        <ul class="feat">
+          <li>60 gün +PLUS erişimi</li>
+          <li>Daha uzun süre tek ödeme</li>
+          <li>Reklamsız ve kesintisiz izleme</li>
+        </ul>
+        <button type="button" class="btn btn-primary plan-buy-btn shopier-buy-btn" data-plan="plus_2m">2 Aylık Al</button>
+      </div>
+
+      <div class="price-card recommended">
+        <span class="plan-badge">EN İYİ SEÇENEK</span>
+        <h2>3 Aylık +PLUS</h2>
+        <p class="amt">250 ₺</p>
+        <p class="price-sub">En yüksek fiyat/performans. Uzun süreli +PLUS deneyimi.</p>
+        <div class="plus-badges" aria-label="+PLUS avantaj rozetleri">
+          <span class="plus-badge ads-free">REKLAMSIZ</span>
+          <span class="plus-badge bg-play">ARKA PLANDA OYNATMA</span>
+          <span class="plus-badge plus-access">+PLUS VİDEOLARA ERİŞİM</span>
+          <span class="plus-badge my-list">LİSTENE EKLE</span>
+        </div>
+        <ul class="feat">
+          <li>90 gün +PLUS erişimi</li>
+          <li>En avantajlı süre/fiyat oranı</li>
+          <li>Reklamsız ve kesintisiz izleme</li>
+        </ul>
+        <button type="button" class="btn btn-primary plan-buy-btn shopier-buy-btn" data-plan="plus_3m">3 Aylık Al</button>
+      </div>
+    </div>
+
+    <div class="billing-consent-wrap">
+      <div class="billing-consent-card">
+        <label class="sub-consent" for="billingConsent">
+          <input id="billingConsent" type="checkbox" />
+          <span>
+            <a href="privacy.html" target="_blank" rel="noopener">Gizlilik Politikası</a> ve
+            <a href="refund-policy.html" target="_blank" rel="noopener">İptal/İade Koşulları</a> metinlerini okudum, kabul ediyorum.
+          </span>
+        </label>
+        <p class="sub-note" style="margin-top: 0.8rem">
+          Bu aşamada sistem tek seferlik Shopier ödemesi ile çalışır. Otomatik yenilenen abonelik bulunmaz.
+        </p>
       </div>
     </div>
 
@@ -305,7 +392,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
     <script src="js/config.js"></script>
     <script src="js/core.js"></script>
     <script src="js/data-service.js"></script>
