@@ -249,6 +249,83 @@ function parseMillisFromDateString(value) {
   return Number.isFinite(ms) ? ms : 0;
 }
 
+function shopierSecretOk(req) {
+  const expected = String(process.env.SHOPIER_WEBHOOK_SECRET || "").trim();
+  if (!expected) return true;
+  const incoming =
+    String(req.get("x-shopier-secret") || "").trim() ||
+    String((req.query && req.query.secret) || "").trim() ||
+    String((req.body && req.body.secret) || "").trim();
+  return incoming && incoming === expected;
+}
+
+function resolveShopierPlanMonths(planKey, rawMonths) {
+  const n = Number(rawMonths || 0);
+  if (Number.isFinite(n) && n > 0) return n;
+  const p = String(planKey || "").toLowerCase();
+  if (p === "plus_1m") return 1;
+  if (p === "plus_2m") return 2;
+  if (p === "plus_3m") return 3;
+  return 1;
+}
+
+function shopierPaid(body) {
+  const b = body || {};
+  const values = [
+    b.status,
+    b.payment_status,
+    b.paymentStatus,
+    b.order_status,
+    b.orderStatus,
+    b.success,
+    b.is_success,
+    b.isSuccess,
+    b.paid
+  ]
+    .map((x) => String(x || "").toLowerCase().trim())
+    .filter(Boolean);
+  return values.some((v) => ["paid", "success", "successful", "approved", "completed", "ok", "1", "true"].includes(v));
+}
+
+async function activateShopierMembership(uid, planKey, months, paymentId, rawData) {
+  if (!uid) return;
+  const now = Date.now();
+  const durationMs = Math.max(1, Number(months || 1)) * 30 * 24 * 60 * 60 * 1000;
+  const userRef = admin.database().ref("users/" + uid);
+  const currentSnap = await userRef.once("value");
+  const current = currentSnap.val() || {};
+  const currentSub = current.subscription || {};
+  const currentExpiryCandidates = [currentSub.expiresAt, currentSub.renewAt, current.expiresAt, current.plusUntil];
+  let currentExpiry = 0;
+  for (let i = 0; i < currentExpiryCandidates.length; i++) {
+    const n = Number(currentExpiryCandidates[i]);
+    if (Number.isFinite(n) && n > 0) {
+      currentExpiry = n;
+      break;
+    }
+  }
+  const startAt = currentExpiry > now ? currentExpiry : now;
+  const expiresAt = startAt + durationMs;
+  await userRef.update({
+    isPro: true,
+    plusUntil: expiresAt,
+    subscription: {
+      provider: "shopier",
+      status: "active",
+      plan: String(planKey || "plus_1m"),
+      months: Math.max(1, Number(months || 1)),
+      startedAt: startAt,
+      expiresAt,
+      renewAt: expiresAt,
+      lastPaymentAt: now,
+      lastPaymentId: String(paymentId || ""),
+      lastWebhookPayloadAt: now,
+      updatedAt: now,
+      raw: rawData || null
+    }
+  });
+}
+
 function readPaddleUid(eventData) {
   const data = eventData || {};
   const direct = data.custom_data && data.custom_data.firebaseUid;
@@ -356,5 +433,55 @@ exports.paddleWebhook = onRequest({ region: "europe-west1" }, async (req, res) =
     res.status(200).json({ ok: true });
   } catch (_err) {
     res.status(500).json({ ok: false, message: "Webhook işlenemedi." });
+  }
+});
+
+exports.shopierWebhook = onRequest({ region: "europe-west1" }, async (req, res) => {
+  cors(res);
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+  if (req.method === "GET") {
+    res.status(200).send("ok");
+    return;
+  }
+  if (req.method !== "POST") {
+    res.status(405).json({ ok: false, message: "Yalnızca POST desteklenir." });
+    return;
+  }
+  if (!shopierSecretOk(req)) {
+    res.status(401).json({ ok: false, message: "Webhook gizli anahtarı doğrulanamadı." });
+    return;
+  }
+
+  try {
+    const body = req.body || {};
+    if (!shopierPaid(body)) {
+      res.status(200).json({ ok: true, ignored: "payment_not_completed" });
+      return;
+    }
+
+    const planKey = String(body.plan || body.planKey || body.package || body.product || "plus_1m").trim();
+    const months = resolveShopierPlanMonths(planKey, body.months || body.durationMonths);
+    const paymentId = String(body.payment_id || body.paymentId || body.order_id || body.orderId || "").trim();
+    let uid = String(body.uid || body.user_uid || body.firebase_uid || "").trim();
+    if (!uid) {
+      const email = String(body.email || body.buyer_email || body.customer_email || "").trim();
+      uid = await findUidByEmail(email);
+    }
+    if (!uid) {
+      res.status(400).json({ ok: false, message: "Kullanıcı kimliği çözümlenemedi." });
+      return;
+    }
+
+    await activateShopierMembership(uid, planKey, months, paymentId, {
+      provider: "shopier",
+      orderId: paymentId || null
+    });
+
+    res.status(200).json({ ok: true, uid, planKey, months });
+  } catch (_e) {
+    res.status(500).json({ ok: false, message: "Shopier webhook işlenemedi." });
   }
 });

@@ -581,7 +581,7 @@
     );
     if (!entries.length) {
       body.innerHTML =
-        '<tr><td colspan="6" style="color:#a1a1aa">Henüz kullanıcı yok. Kayıt ekranından veya ana sayfadan giriş yapıldıkça burada listelenir.</td></tr>';
+        '<tr><td colspan="7" style="color:#a1a1aa">Henüz kullanıcı yok. Kayıt ekranından veya ana sayfadan giriş yaptıkça burada listelenir.</td></tr>';
       $("usersInfo").textContent =
         "Liste boş: Kullanıcılar kayıt/giriş yaptıkça /users altında oluşur. Şu an görüntülenecek profil bulunamadı.";
       return;
@@ -591,6 +591,23 @@
     entries.forEach(([uid, v]) => {
       const tr = document.createElement("tr");
       const pro = v.isPro === true;
+      const sub = v.subscription || {};
+      const expiryCandidates = [sub.expiresAt, sub.renewAt, v.expiresAt, v.plusUntil];
+      let expiryAt = 0;
+      for (let i = 0; i < expiryCandidates.length; i++) {
+        const n = Number(expiryCandidates[i]);
+        if (Number.isFinite(n) && n > 0) {
+          expiryAt = n;
+          break;
+        }
+      }
+      const leftDays = expiryAt ? Math.ceil((expiryAt - Date.now()) / (24 * 60 * 60 * 1000)) : null;
+      const leftText =
+        leftDays == null
+          ? "—"
+          : leftDays >= 0
+          ? leftDays + " gün (bitiş: " + new Date(expiryAt).toLocaleDateString("tr-TR") + ")"
+          : "Süre doldu";
       tr.innerHTML =
         '<td><input type="checkbox" class="u-select" data-uid="' +
         esc(uid) +
@@ -607,6 +624,8 @@
         '">' +
         (pro ? "+PLUS" : "—") +
         "</span></td><td>" +
+        leftText +
+        "</td><td>" +
         '<button type="button" class="btn btn-ghost btn-toggle" data-uid="' +
         esc(uid) +
         '" data-pro="' +
@@ -679,6 +698,51 @@
     }
     await Promise.all(ids.map((uid) => DataService.userRef(uid).child("isPro").set(!!nextPro)));
     $("usersInfo").textContent = ids.length + " kullanıcı güncellendi: " + (nextPro ? "Plus açık" : "Plus kapalı");
+  }
+
+  async function assignSelectedUsersPlusDays(days) {
+    const durationDays = Number(days || 0);
+    if (!Number.isFinite(durationDays) || durationDays <= 0) return;
+    const ids = getSelectedUserIds();
+    if (!ids.length) {
+      $("usersInfo").textContent = "Önce en az bir kullanıcı seçin.";
+      return;
+    }
+    const now = Date.now();
+    const durationMs = durationDays * 24 * 60 * 60 * 1000;
+    await Promise.all(
+      ids.map(async (uid) => {
+        const snap = await DataService.userRef(uid).once("value");
+        const profile = snap.val() || {};
+        const sub = profile.subscription || {};
+        const currentCandidates = [sub.expiresAt, sub.renewAt, profile.expiresAt, profile.plusUntil];
+        let currentExpiry = 0;
+        for (let i = 0; i < currentCandidates.length; i++) {
+          const n = Number(currentCandidates[i]);
+          if (Number.isFinite(n) && n > 0) {
+            currentExpiry = n;
+            break;
+          }
+        }
+        const startAt = currentExpiry > now ? currentExpiry : now;
+        const expiresAt = startAt + durationMs;
+        await DataService.userRef(uid).update({
+          isPro: true,
+          plusUntil: expiresAt,
+          subscription: {
+            provider: "admin_manual",
+            status: "active",
+            plan: "manual_" + durationDays + "d",
+            startedAt: startAt,
+            expiresAt,
+            renewAt: expiresAt,
+            months: Math.max(1, Math.round(durationDays / 30)),
+            updatedAt: Date.now()
+          }
+        });
+      })
+    );
+    $("usersInfo").textContent = ids.length + " kullanıcıya +" + durationDays + " gün +PLUS süresi tanımlandı.";
   }
 
   function esc(s) {
@@ -978,6 +1042,11 @@
     $("btnCancelContent").addEventListener("click", () => closeEditor());
     $("btnGrantPro").addEventListener("click", () => setSelectedUsersPro(true));
     $("btnRevokePro").addEventListener("click", () => setSelectedUsersPro(false));
+    $("btnPlus3d").addEventListener("click", () => assignSelectedUsersPlusDays(3));
+    $("btnPlus5d").addEventListener("click", () => assignSelectedUsersPlusDays(5));
+    $("btnPlus10d").addEventListener("click", () => assignSelectedUsersPlusDays(10));
+    $("btnPlus15d").addEventListener("click", () => assignSelectedUsersPlusDays(15));
+    $("btnPlus30d").addEventListener("click", () => assignSelectedUsersPlusDays(30));
     $("btnSelectAllUsers").addEventListener("click", () => {
       Object.keys(state.users || {}).forEach((uid) => {
         state.selectedUsers[uid] = true;

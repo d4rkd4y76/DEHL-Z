@@ -5,6 +5,7 @@ Bu klasor su fonksiyonlari icerir:
 - `accountRecovery`: Gizli soru ile tek kullanimlik sifre uretir.
 - `myListToggle`: My List ekle/cikar islemini backend rate-limit ile yapar.
 - `paddleWebhook`: Paddle abonelik event'leri ile `isPro/subscription` alanlarini senkronlar.
+- `shopierWebhook`: Shopier odeme bildirimi ile kullanicinin +PLUS suresini otomatik aktive eder.
 
 ## Kurulum
 
@@ -18,11 +19,14 @@ Bu klasor su fonksiyonlari icerir:
    - `cd functions && npm install`
 5. Paddle webhook imza dogrulamasi icin secret ayarlayin:
    - `firebase functions:secrets:set PADDLE_WEBHOOK_SECRET`
-6. Deploy edin:
-   - `firebase deploy --only functions:accountRecovery,functions:myListToggle,functions:paddleWebhook`
+6. Shopier webhook guvenlik anahtari (onerilir):
+   - `firebase functions:secrets:set SHOPIER_WEBHOOK_SECRET`
+7. Deploy edin:
+   - `firebase deploy --only functions:accountRecovery,functions:myListToggle,functions:paddleWebhook,functions:shopierWebhook`
 
 Fonksiyon URL'leri:
 - `https://europe-west1-dehliz-a95cd.cloudfunctions.net/accountRecovery`
 - `https://europe-west1-dehliz-a95cd.cloudfunctions.net/myListToggle`
 - `https://europe-west1-dehliz-a95cd.cloudfunctions.net/paddleWebhook`
+- `https://europe-west1-dehliz-a95cd.cloudfunctions.net/shopierWebhook`
 

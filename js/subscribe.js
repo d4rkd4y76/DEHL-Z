@@ -26,6 +26,17 @@
     return Math.ceil((ts - Date.now()) / (24 * 60 * 60 * 1000));
   }
 
+  function readStartAt(profile) {
+    if (!profile) return 0;
+    const sub = profile.subscription || {};
+    const candidates = [sub.startedAt, sub.startAt, profile.plusStartedAt];
+    for (let i = 0; i < candidates.length; i++) {
+      const n = Number(candidates[i]);
+      if (Number.isFinite(n) && n > 0) return n;
+    }
+    return 0;
+  }
+
   function fmtDate(ts) {
     if (!ts) return "-";
     const d = new Date(ts);
@@ -128,9 +139,15 @@
     const left = daysUntil(renewAt);
 
     if (pro) {
+      const startAt = readStartAt(profile);
       const renewText =
         renewAt && left != null
-          ? "Erişim bitiş tarihi: " + fmtDate(renewAt) + " (" + (left >= 0 ? left + " gün kaldı" : "süresi doldu") + ")"
+          ? "Başlangıç: " +
+            (startAt ? fmtDate(startAt) : "-") +
+            " • Bitiş: " +
+            fmtDate(renewAt) +
+            " • Kalan süre: " +
+            (left >= 0 ? left + " gün" : "süresi doldu")
           : "Erişim bitiş tarihi kısa süre içinde profilinizde görüntülenecektir.";
       box.innerHTML =
         '<div class="status-card">' +
@@ -140,6 +157,11 @@
         '<p class="status-sub">' +
         renewText +
         "</p>" +
+        (left != null && left >= 0 && left <= 5
+          ? '<p class="sub-note">Uyarı: +PLUS üyeliğinizin bitmesine ' +
+            left +
+            " gün kaldı. Kesinti yaşamamak için paketinizi yenileyebilirsiniz.</p>"
+          : "") +
         '<ol class="sub-step-list"><li>+PLUS videoları sınırsız açabilirsiniz.</li><li>İçerikleri listenize ekleyip kişisel arşivinizi oluşturabilirsiniz.</li><li>Arka planda dinleme ayrıcalığınız aktif olur.</li><li>Sıfır reklam deneyimiyle içerikleri kesintisiz izlersiniz.</li></ol>' +
         '<p class="sub-help" style="margin:0.55rem 0 0">Sürenizi uzatmak için aşağıdaki Shopier paketlerinden birini tekrar satın alabilirsiniz.</p>' +
         supportLinksHtml() +

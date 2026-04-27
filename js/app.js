@@ -121,15 +121,32 @@
     return "Yenileme tarihi geçmiş: " + date + " (" + days + " gün önce).";
   }
 
+  function readMembershipStartAt(profile) {
+    if (!profile) return 0;
+    const sub = profile.subscription || {};
+    const candidates = [sub.startedAt, sub.startAt, profile.plusStartedAt];
+    for (let i = 0; i < candidates.length; i++) {
+      const n = Number(candidates[i]);
+      if (Number.isFinite(n) && n > 0) return n;
+    }
+    return 0;
+  }
+
+  function daysLeftTo(ts) {
+    if (!ts) return null;
+    const diff = Number(ts) - Date.now();
+    return Math.ceil(diff / (24 * 60 * 60 * 1000));
+  }
+
   function renderSubscriptionPanel() {
     const badge = $("subPlanBadge");
     const renew = $("subRenewText");
-    const cancelBtn = $("btnCancelSubscription");
-    if (!badge || !renew || !cancelBtn) return;
+    const metaGrid = $("subMetaGrid");
+    if (!badge || !renew || !metaGrid) return;
     const profile = state.profile || {};
     const isPlus = isPlusMember(profile);
     const sub = profile.subscription || {};
-    const cancelPending = sub.cancelAtPeriodEnd === true || sub.status === "cancel_pending";
+    const provider = String(sub.provider || "").toLowerCase() || "shopier";
 
     badge.classList.remove("plus", "free");
     if (isPlus) {
@@ -141,12 +158,45 @@
     }
 
     const renewalAt = readRenewalAt(profile);
+    const startAt = readMembershipStartAt(profile);
+    const left = daysLeftTo(renewalAt);
     let renewLine = renewalDaysText(renewalAt);
-    if (cancelPending) renewLine += " İptal talebiniz alındı, dönem sonunda yenileme durdurulacak.";
+    if (isPlus && startAt) {
+      renewLine =
+        "Başlangıç: " +
+        new Date(startAt).toLocaleDateString("tr-TR") +
+        " • Bitiş: " +
+        (renewalAt ? new Date(renewalAt).toLocaleDateString("tr-TR") : "-") +
+        (left != null ? " • Kalan süre: " + (left >= 0 ? left + " gün" : "süre doldu") : "");
+    }
+    if (isPlus && left != null && left >= 0 && left <= 5) {
+      renewLine += " • Uyarı: Son 5 güne girdiniz.";
+    }
     renew.textContent = renewLine;
-
-    cancelBtn.disabled = !isPlus || cancelPending;
-    cancelBtn.textContent = cancelPending ? "İptal talebi alındı" : "Aboneliği iptal et";
+    const startText = startAt ? new Date(startAt).toLocaleDateString("tr-TR") : "—";
+    const endText = renewalAt ? new Date(renewalAt).toLocaleDateString("tr-TR") : "—";
+    const leftText = left == null ? "—" : left >= 0 ? left + " gün" : "Süre doldu";
+    const planText = isPlus ? (sub.plan ? String(sub.plan).toUpperCase() : "+PLUS PAKET") : "AKTİF PAKET YOK";
+    const providerText = provider === "shopier" ? "SHOPIER" : provider.toUpperCase();
+    metaGrid.innerHTML =
+      '<div class="sub-meta-item"><p class="sub-meta-label">Plan</p><p class="sub-meta-value">' +
+      planText +
+      '</p></div>' +
+      '<div class="sub-meta-item"><p class="sub-meta-label">Ödeme Türü</p><p class="sub-meta-value">' +
+      providerText +
+      '</p></div>' +
+      '<div class="sub-meta-item"><p class="sub-meta-label">Başlangıç</p><p class="sub-meta-value">' +
+      startText +
+      '</p></div>' +
+      '<div class="sub-meta-item"><p class="sub-meta-label">Bitiş</p><p class="sub-meta-value">' +
+      endText +
+      '</p></div>' +
+      '<div class="sub-meta-item"><p class="sub-meta-label">Kalan Süre</p><p class="sub-meta-value ' +
+      (left != null && left >= 0 && left <= 5 ? "warn" : "") +
+      '">' +
+      leftText +
+      '</p></div>' +
+      '<div class="sub-meta-item"><p class="sub-meta-label">Yenileme</p><p class="sub-meta-value">Otomatik yenileme yok</p></div>';
   }
 
   function clearProfileMessages() {
@@ -276,6 +326,41 @@
         if (box.parentNode) box.parentNode.removeChild(box);
       }, 260);
     }, 1900);
+  }
+
+  function showPlusExpiryNotice(daysLeft, expiresAt) {
+    const old = document.getElementById("plusExpiryNotice");
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    const box = document.createElement("div");
+    box.id = "plusExpiryNotice";
+    box.className = "my-list-action-notice is-warning";
+    const dateText = expiresAt ? new Date(expiresAt).toLocaleDateString("tr-TR") : "-";
+    box.innerHTML =
+      '<div class="my-list-action-notice-title">+PLUS Süre Uyarısı</div><div class="my-list-action-notice-text">Üyeliğinizin bitmesine ' +
+      daysLeft +
+      " gün kaldı (bitiş: " +
+      dateText +
+      "). Süre kesintisi yaşamamak için paketinizi yenileyebilirsiniz.</div>";
+    document.body.appendChild(box);
+    requestAnimationFrame(() => box.classList.add("show"));
+    setTimeout(() => {
+      box.classList.remove("show");
+      setTimeout(() => {
+        if (box.parentNode) box.parentNode.removeChild(box);
+      }, 260);
+    }, 3200);
+  }
+
+  function maybeShowPlusExpiryReminder(profile) {
+    if (!state.user || !isPlusMember(profile)) return;
+    const expiresAt = readRenewalAt(profile);
+    const daysLeft = daysLeftTo(expiresAt);
+    if (daysLeft == null || daysLeft > 5 || daysLeft < 0) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const key = "dehliz.plus-expiry." + state.user.uid + "." + today;
+    if (localStorage.getItem(key) === "1") return;
+    localStorage.setItem(key, "1");
+    showPlusExpiryNotice(daysLeft, expiresAt);
   }
 
   function normalizeCategoryLabel(v) {
@@ -1325,6 +1410,7 @@
     }
     updateAuthUi();
     renderSubscriptionPanel();
+    maybeShowPlusExpiryReminder(state.profile);
     queueRenderRows();
   }
 
@@ -1393,57 +1479,6 @@
     }
   }
 
-  async function cancelSubscriptionFlow() {
-    if (!state.user) return;
-    if (!isPlusMember(state.profile)) {
-      await openUiDialog({
-        title: "Abonelik Bilgisi",
-        message: "Aktif bir +PLUS üyelik bulunmuyor.",
-        buttons: [{ label: "Tamam", value: true, className: "btn-primary" }]
-      });
-      return;
-    }
-    const confirmResult = await openUiDialog({
-      title: "Abonelik İptali Onayı",
-      message: "Aboneliğiniz dönem sonuna kadar aktif kalır ve sonrasında otomatik yenileme kapanır. İptal talebini göndermek istiyor musunuz?",
-      buttons: [
-        { label: "Vazgeç", value: false, className: "btn-ghost" },
-        { label: "İptali Onayla", value: true, className: "btn-primary" }
-      ]
-    });
-    if (!confirmResult) return;
-
-    const now = Date.now();
-    try {
-      await DataService.userRef(state.user.uid)
-        .child("subscription")
-        .update({
-          cancelAtPeriodEnd: true,
-          cancelRequestedAt: now,
-          status: "cancel_pending"
-        });
-      if (!state.profile) state.profile = {};
-      state.profile.subscription = {
-        ...(state.profile.subscription || {}),
-        cancelAtPeriodEnd: true,
-        cancelRequestedAt: now,
-        status: "cancel_pending"
-      };
-      renderSubscriptionPanel();
-      await openUiDialog({
-        title: "Talebiniz Alındı",
-        message: "Abonelik iptal talebiniz başarıyla kaydedildi. +PLUS erişiminiz mevcut dönem sonuna kadar devam edecektir.",
-        buttons: [{ label: "Tamam", value: true, className: "btn-primary" }]
-      });
-    } catch (e) {
-      await openUiDialog({
-        title: "İşlem Başarısız",
-        message: dehlizUserError(e, "Abonelik iptal talebi gönderilemedi. Lütfen tekrar deneyin."),
-        buttons: [{ label: "Kapat", value: true, className: "btn-ghost" }]
-      });
-    }
-  }
-
   function wireAuth() {
     const goRegisterPage = () => {
       const email = encodeURIComponent(($("em").value || "").trim());
@@ -1456,7 +1491,6 @@
     $("btnLogout").addEventListener("click", () => dehlizSignOut());
     $("btnProfile").addEventListener("click", () => openProfileModal(false));
     $("btnSaveProfile").addEventListener("click", saveProfile);
-    $("btnCancelSubscription").addEventListener("click", cancelSubscriptionFlow);
     document.querySelectorAll("[data-profile-tab]").forEach((btn) => {
       btn.addEventListener("click", () => {
         openProfileTab(btn.getAttribute("data-profile-tab") || "account");
