@@ -21,6 +21,8 @@
   let rowsRenderQueued = false;
   let contentRefreshTimer = null;
   let catalogPollTimer = null;
+  let profileUrgencyTicker = null;
+  let profileUrgencyShowDays = false;
   let liveCatalogAttached = false;
   let activeProfileTab = "account";
   const myListToggleLockById = Object.create(null);
@@ -167,6 +169,23 @@
       daysLeft: left,
       hasExpiry: Number(expiresAt || 0) > 0
     };
+  }
+
+  function stopProfileUrgencyTicker() {
+    if (profileUrgencyTicker) {
+      clearInterval(profileUrgencyTicker);
+      profileUrgencyTicker = null;
+    }
+    profileUrgencyShowDays = false;
+  }
+
+  function ensureProfileUrgencyTicker(profileBtn) {
+    if (profileUrgencyTicker) return;
+    profileUrgencyTicker = setInterval(() => {
+      profileUrgencyShowDays = !profileUrgencyShowDays;
+      if (!profileBtn || !profileBtn.isConnected) return;
+      profileBtn.classList.toggle("is-days", profileUrgencyShowDays);
+    }, 10000);
   }
 
   function renderSubscriptionPanel() {
@@ -1417,14 +1436,21 @@
     }
     const pro = isPlusMember(state.profile);
     const proEl = $("proChip");
-    if (proEl) proEl.style.display = pro ? "inline-flex" : "none";
+    if (proEl) proEl.style.display = "none";
     const urgency = plusUrgency(state.profile);
     const profileBtn = $("btnProfile");
     if (profileBtn) {
       profileBtn.classList.toggle("btn-profile-plus", pro);
       profileBtn.classList.toggle("btn-profile-urgent", urgency.urgent);
-      if (urgency.urgent) profileBtn.setAttribute("data-days-left", String(urgency.daysLeft));
-      else profileBtn.removeAttribute("data-days-left");
+      if (urgency.urgent) {
+        profileBtn.setAttribute("data-days-left", String(urgency.daysLeft));
+        profileBtn.classList.toggle("is-days", profileUrgencyShowDays);
+        ensureProfileUrgencyTicker(profileBtn);
+      } else {
+        profileBtn.removeAttribute("data-days-left");
+        profileBtn.classList.remove("is-days");
+        stopProfileUrgencyTicker();
+      }
     }
     const userBlock = $("navUserBlock");
     if (userBlock) userBlock.classList.toggle("nav-user--hidden", !u);

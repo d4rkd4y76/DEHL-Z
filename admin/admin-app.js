@@ -640,7 +640,11 @@
       tr.querySelector(".btn-toggle").addEventListener("click", async (e) => {
         const u = e.target.getAttribute("data-uid");
         const next = e.target.getAttribute("data-pro") !== "1";
-        await DataService.userRef(u).child("isPro").set(next);
+        if (next) {
+          await DataService.userRef(u).child("isPro").set(true);
+        } else {
+          await clearUserPlusState(u);
+        }
       });
       body.appendChild(tr);
     });
@@ -690,13 +694,27 @@
     return Object.keys(state.selectedUsers).filter((uid) => state.selectedUsers[uid] && state.users[uid]);
   }
 
+  async function clearUserPlusState(uid) {
+    await DataService.userRef(uid).update({
+      isPro: false,
+      plusUntil: null,
+      expiresAt: null,
+      renewAt: null,
+      subscription: null
+    });
+  }
+
   async function setSelectedUsersPro(nextPro) {
     const ids = getSelectedUserIds();
     if (!ids.length) {
       $("usersInfo").textContent = "Önce en az bir kullanıcı seçin.";
       return;
     }
-    await Promise.all(ids.map((uid) => DataService.userRef(uid).child("isPro").set(!!nextPro)));
+    if (nextPro) {
+      await Promise.all(ids.map((uid) => DataService.userRef(uid).child("isPro").set(true)));
+    } else {
+      await Promise.all(ids.map((uid) => clearUserPlusState(uid)));
+    }
     $("usersInfo").textContent = ids.length + " kullanıcı güncellendi: " + (nextPro ? "Plus açık" : "Plus kapalı");
   }
 
