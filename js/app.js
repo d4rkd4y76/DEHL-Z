@@ -136,6 +136,39 @@
     return Math.ceil(diff / (24 * 60 * 60 * 1000));
   }
 
+  function safeSessionGet(key) {
+    try {
+      return sessionStorage.getItem(key);
+    } catch (_e) {
+      return null;
+    }
+  }
+
+  function safeSessionSet(key, value) {
+    try {
+      sessionStorage.setItem(key, value);
+    } catch (_e) {}
+  }
+
+  function safeSessionRemoveByPrefix(prefix) {
+    try {
+      for (let i = sessionStorage.length - 1; i >= 0; i--) {
+        const k = sessionStorage.key(i);
+        if (k && k.indexOf(prefix) === 0) sessionStorage.removeItem(k);
+      }
+    } catch (_e) {}
+  }
+
+  function plusUrgency(profile) {
+    const expiresAt = readRenewalAt(profile);
+    const left = daysLeftTo(expiresAt);
+    return {
+      urgent: left != null && left >= 0 && left <= 5,
+      daysLeft: left,
+      hasExpiry: Number(expiresAt || 0) > 0
+    };
+  }
+
   function renderSubscriptionPanel() {
     const badge = $("subPlanBadge");
     const renew = $("subRenewText");
@@ -167,14 +200,22 @@
         (renewalAt ? new Date(renewalAt).toLocaleDateString("tr-TR") : "-") +
         (left != null ? " • Kalan süre: " + (left >= 0 ? left + " gün" : "süre doldu") : "");
     }
-    if (isPlus && left != null && left >= 0 && left <= 5) {
-      renewLine += " • Uyarı: Son 5 güne girdiniz.";
-    }
     renew.textContent = renewLine;
+    const planRaw = String(sub.plan || "").trim();
+    const planMap = {
+      plus_1m: "1 Aylık +PLUS",
+      plus_2m: "2 Aylık +PLUS",
+      plus_3m: "3 Aylık +PLUS",
+      manual_3d: "3 Günlük +PLUS",
+      manual_5d: "5 Günlük +PLUS",
+      manual_10d: "10 Günlük +PLUS",
+      manual_15d: "15 Günlük +PLUS",
+      manual_30d: "30 Günlük +PLUS"
+    };
     const startText = startAt ? new Date(startAt).toLocaleDateString("tr-TR") : "—";
     const endText = renewalAt ? new Date(renewalAt).toLocaleDateString("tr-TR") : "—";
     const leftText = left == null ? "—" : left >= 0 ? left + " gün" : "Süre doldu";
-    const planText = isPlus ? (sub.plan ? String(sub.plan).toUpperCase() : "+PLUS PAKET") : "AKTİF PAKET YOK";
+    const planText = isPlus ? planMap[planRaw] || (planRaw ? planRaw.toUpperCase() : "+PLUS PAKET") : "AKTİF PAKET YOK";
     const providerText = provider === "shopier" ? "SHOPIER" : provider.toUpperCase();
     metaGrid.innerHTML =
       '<div class="sub-meta-item"><p class="sub-meta-label">Plan</p><p class="sub-meta-value">' +
@@ -326,39 +367,29 @@
     }, 1900);
   }
 
-  function showPlusExpiryNotice(daysLeft, expiresAt) {
-    const old = document.getElementById("plusExpiryNotice");
-    if (old && old.parentNode) old.parentNode.removeChild(old);
-    const box = document.createElement("div");
-    box.id = "plusExpiryNotice";
-    box.className = "my-list-action-notice is-warning";
-    const dateText = expiresAt ? new Date(expiresAt).toLocaleDateString("tr-TR") : "-";
-    box.innerHTML =
-      '<div class="my-list-action-notice-title">+PLUS Süre Uyarısı</div><div class="my-list-action-notice-text">Üyeliğinizin bitmesine ' +
-      daysLeft +
-      " gün kaldı (bitiş: " +
-      dateText +
-      "). Süre kesintisi yaşamamak için paketinizi yenileyebilirsiniz.</div>";
-    document.body.appendChild(box);
-    requestAnimationFrame(() => box.classList.add("show"));
-    setTimeout(() => {
-      box.classList.remove("show");
-      setTimeout(() => {
-        if (box.parentNode) box.parentNode.removeChild(box);
-      }, 260);
-    }, 3200);
-  }
-
-  function maybeShowPlusExpiryReminder(profile) {
+  async function maybeShowPlusExpiryReminder(profile) {
     if (!state.user || !isPlusMember(profile)) return;
     const expiresAt = readRenewalAt(profile);
     const daysLeft = daysLeftTo(expiresAt);
     if (daysLeft == null || daysLeft > 5 || daysLeft < 0) return;
-    const today = new Date().toISOString().slice(0, 10);
-    const key = "dehliz.plus-expiry." + state.user.uid + "." + today;
-    if (localStorage.getItem(key) === "1") return;
-    localStorage.setItem(key, "1");
-    showPlusExpiryNotice(daysLeft, expiresAt);
+    const key = "dehliz.plus-expiry.shown." + state.user.uid;
+    if (safeSessionGet(key) === "1") return;
+    safeSessionSet(key, "1");
+    const dateText = expiresAt ? new Date(expiresAt).toLocaleDateString("tr-TR") : "-";
+    const goRenew = await openUiDialog({
+      title: "+PLUS Süre Uyarısı",
+      message:
+        "Üyeliğinizin bitmesine " +
+        daysLeft +
+        " gün kaldı (bitiş: " +
+        dateText +
+        "). Süre kesintisi yaşamamak için paketinizi yenileyebilirsiniz.",
+      buttons: [
+        { label: "Kapat", value: false, className: "btn-ghost" },
+        { label: "Paketleri Gör", value: true, className: "btn-primary" }
+      ]
+    });
+    if (goRenew) window.location.href = "subscribe.html";
   }
 
   function normalizeCategoryLabel(v) {
@@ -1386,9 +1417,15 @@
     }
     const pro = isPlusMember(state.profile);
     const proEl = $("proChip");
-    if (proEl) proEl.style.display = "none";
+    if (proEl) proEl.style.display = pro ? "inline-flex" : "none";
+    const urgency = plusUrgency(state.profile);
     const profileBtn = $("btnProfile");
-    if (profileBtn) profileBtn.classList.toggle("btn-profile-plus", pro);
+    if (profileBtn) {
+      profileBtn.classList.toggle("btn-profile-plus", pro);
+      profileBtn.classList.toggle("btn-profile-urgent", urgency.urgent);
+      if (urgency.urgent) profileBtn.setAttribute("data-days-left", String(urgency.daysLeft));
+      else profileBtn.removeAttribute("data-days-left");
+    }
     const userBlock = $("navUserBlock");
     if (userBlock) userBlock.classList.toggle("nav-user--hidden", !u);
     $("adminLink").style.display = state.isAdmin ? "inline" : "none";
@@ -1396,6 +1433,9 @@
 
   async function refreshProfile() {
     if (!state.user) {
+      // Logout olduğunda oturum bazlı süre uyarı kaydını temizle
+      // (tekrar girişte uyarı yeniden gösterilsin).
+      safeSessionRemoveByPrefix("dehliz.plus-expiry.shown.");
       state.profile = null;
       state.isAdmin = false;
       state.myList = {};
@@ -1504,7 +1544,30 @@
       $("authModal").classList.add("open");
     });
     $("btnLogout").addEventListener("click", () => dehlizSignOut());
-    $("btnProfile").addEventListener("click", () => openProfileModal(false));
+    $("btnProfile").addEventListener("click", async () => {
+      const urgency = plusUrgency(state.profile);
+      if (!urgency.urgent) {
+        openProfileModal(false);
+        return;
+      }
+      const goRenew = await openUiDialog({
+        title: "+PLUS Süre Uyarısı",
+        message:
+          "Üyeliğinizin bitmesine " +
+          urgency.daysLeft +
+          " gün kaldı. Yenileme için +PLUS paket ekranına gidebilir veya üyelik detayınızı görüntüleyebilirsiniz.",
+        buttons: [
+          { label: "Abonelik Detayı", value: false, className: "btn-ghost" },
+          { label: "Paketleri Gör", value: true, className: "btn-primary" }
+        ]
+      });
+      if (goRenew) {
+        window.location.href = "subscribe.html";
+        return;
+      }
+      openProfileModal(false);
+      openProfileTab("subscription");
+    });
     $("btnSaveProfile").addEventListener("click", saveProfile);
     document.querySelectorAll("[data-profile-tab]").forEach((btn) => {
       btn.addEventListener("click", () => {

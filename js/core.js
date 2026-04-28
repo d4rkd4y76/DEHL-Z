@@ -12,6 +12,19 @@
   window.dehlizDb = firebase.database();
   window.dehlizAuth = firebase.auth();
 
+  // Tarayici farkliliklarinda oturumun kaybolmamasini saglamak icin
+  // kaliciligi sirasiyla LOCAL -> SESSION -> NONE fallback ile ayarla.
+  (function ensureAuthPersistence() {
+    const auth = window.dehlizAuth;
+    if (!auth || !firebase.auth || !firebase.auth.Auth || !firebase.auth.Auth.Persistence) return;
+    const P = firebase.auth.Auth.Persistence;
+    auth
+      .setPersistence(P.LOCAL)
+      .catch(() => auth.setPersistence(P.SESSION))
+      .catch(() => auth.setPersistence(P.NONE))
+      .catch(() => {});
+  })();
+
   window.bunnyEmbedUrl = function (libraryId, videoId) {
     const base = (cfg.bunnyEmbedBase || "https://player.mediadelivery.net/embed").replace(/\/$/, "");
     const params = new URLSearchParams({

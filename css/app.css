@@ -748,12 +748,6 @@ button {
     linear-gradient(180deg, rgba(18, 18, 24, 0.96), rgba(12, 12, 18, 0.94));
 }
 
-.my-list-action-notice.is-warning {
-  border-color: rgba(250, 204, 21, 0.48);
-  background:
-    radial-gradient(120% 140% at 0% 0%, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0) 56%),
-    linear-gradient(180deg, rgba(18, 18, 24, 0.96), rgba(12, 12, 18, 0.94));
-}
 
 .my-list-action-notice.show {
   opacity: 1;
@@ -770,10 +764,6 @@ button {
 
 .my-list-action-notice.is-removed .my-list-action-notice-title {
   color: #fca5a5;
-}
-
-.my-list-action-notice.is-warning .my-list-action-notice-title {
-  color: #fde68a;
 }
 
 .my-list-action-notice-text {
@@ -812,6 +802,51 @@ button {
     0 2px 10px rgba(245, 158, 11, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   z-index: 1;
+}
+
+#btnProfile.btn-profile-urgent {
+  border-color: rgba(248, 113, 113, 0.62);
+  background:
+    radial-gradient(120% 150% at 0% 0%, rgba(239, 68, 68, 0.24), rgba(239, 68, 68, 0) 58%),
+    rgba(127, 29, 29, 0.24);
+  color: #fee2e2;
+  box-shadow:
+    0 0 0 1px rgba(248, 113, 113, 0.3) inset,
+    0 8px 18px rgba(127, 29, 29, 0.32);
+}
+
+#btnProfile.btn-profile-urgent::before {
+  content: "!";
+  position: absolute;
+  top: -0.38rem;
+  right: -0.35rem;
+  width: 1.02rem;
+  height: 1.02rem;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px rgba(9, 9, 11, 1);
+}
+
+#btnProfile.btn-profile-urgent[data-days-left]::after {
+  content: attr(data-days-left) " gün";
+  left: 50%;
+  top: auto;
+  bottom: -1.02rem;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.85);
+  border: 1px solid rgba(248, 113, 113, 0.52);
+  border-radius: 999px;
+  padding: 0.08rem 0.38rem;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .pro-badge {
@@ -1445,9 +1480,11 @@ main {
 
 .sub-card {
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 0.75rem 0.8rem;
+  border-radius: 12px;
+  background:
+    radial-gradient(130% 160% at 0% 0%, rgba(220, 38, 38, 0.09), rgba(220, 38, 38, 0) 56%),
+    rgba(255, 255, 255, 0.03);
+  padding: 0.95rem 1rem;
   margin-bottom: 0.65rem;
 }
 
@@ -1487,8 +1524,9 @@ main {
 
 .sub-renew-text {
   margin: 0.55rem 0 0;
-  color: #d4d4d8;
-  line-height: 1.5;
+  color: #e4e4e7;
+  line-height: 1.55;
+  font-size: 0.9rem;
 }
 
 .sub-meta-grid {
