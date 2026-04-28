@@ -12,9 +12,7 @@
     content: {},
     settings: {}
   };
-  const MY_LIST_TOGGLE_COOLDOWN_MS = 1200;
   const myListToggleLockById = Object.create(null);
-  const myListToggleLastAtById = Object.create(null);
   const SPECIAL_CATEGORY_TITLES = {
     __my_list__: "LİSTENİZ",
     __latest__: "Son Yüklenenler",
@@ -101,16 +99,43 @@
 
   async function toggleMyList(id) {
     if (!canUseMyList() || !state.user || !id) return;
-    const now = Date.now();
     if (myListToggleLockById[id]) return false;
-    const lastAt = Number(myListToggleLastAtById[id] || 0);
-    if (now - lastAt < MY_LIST_TOGGLE_COOLDOWN_MS) return false;
 
     myListToggleLockById[id] = true;
     try {
-      await DataService.toggleMyListSecure(id);
-      myListToggleLastAtById[id] = Date.now();
+      const wasListed = !!(state.myList && state.myList[id]);
+      const optimisticAdded = !wasListed;
+      if (!state.myList) state.myList = {};
+      if (optimisticAdded) state.myList[id] = true;
+      else delete state.myList[id];
+      if (state.categoryId === "__my_list__") renderCategory();
+      else {
+        syncRenderedMyListButtons();
+        if (state.selectedDetailId) updateDetailListButton(state.selectedDetailId);
+      }
+
+      const result = await DataService.toggleMyListSecure(id);
+      const serverAdded = !!(result && result.added === true);
+      if (serverAdded !== optimisticAdded) {
+        if (serverAdded) state.myList[id] = true;
+        else delete state.myList[id];
+        if (state.categoryId === "__my_list__") renderCategory();
+        else {
+          syncRenderedMyListButtons();
+          if (state.selectedDetailId) updateDetailListButton(state.selectedDetailId);
+        }
+      }
       return true;
+    } catch (err) {
+      const currentlyListed = !!(state.myList && state.myList[id]);
+      if (currentlyListed) delete state.myList[id];
+      else state.myList[id] = true;
+      if (state.categoryId === "__my_list__") renderCategory();
+      else {
+        syncRenderedMyListButtons();
+        if (state.selectedDetailId) updateDetailListButton(state.selectedDetailId);
+      }
+      throw err;
     } finally {
       myListToggleLockById[id] = false;
     }
@@ -121,11 +146,7 @@
     try {
       await toggleMyList(id);
     } finally {
-      if (btn && btn.isConnected) {
-        setTimeout(() => {
-          if (btn.isConnected) btn.disabled = false;
-        }, 120);
-      }
+      if (btn && btn.isConnected) btn.disabled = false;
     }
   }
 

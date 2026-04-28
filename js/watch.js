@@ -36,9 +36,7 @@
   let commentsPageSize = 25;
   let commentsLoadMoreBtn = null;
   let authResolved = false;
-  const MY_LIST_TOGGLE_COOLDOWN_MS = 1200;
   const myListToggleLockById = Object.create(null);
-  const myListToggleLastAtById = Object.create(null);
 
   function isPlusMember(profile) {
     if (!profile) return false;
@@ -183,16 +181,30 @@
 
   async function toggleMyListForCurrentItem() {
     if (!id || !currentUser || !currentUser.uid) return false;
-    const now = Date.now();
     if (myListToggleLockById[id]) return false;
-    const lastAt = Number(myListToggleLastAtById[id] || 0);
-    if (now - lastAt < MY_LIST_TOGGLE_COOLDOWN_MS) return false;
 
     myListToggleLockById[id] = true;
     try {
-      await DataService.toggleMyListSecure(id);
-      myListToggleLastAtById[id] = Date.now();
+      const wasListed = !!currentMyList[id];
+      const optimisticAdded = !wasListed;
+      if (optimisticAdded) currentMyList[id] = true;
+      else delete currentMyList[id];
+      if (currentItemForPlayback) renderMeta(currentItemForPlayback);
+
+      const result = await DataService.toggleMyListSecure(id);
+      const serverAdded = !!(result && result.added === true);
+      if (serverAdded !== optimisticAdded) {
+        if (serverAdded) currentMyList[id] = true;
+        else delete currentMyList[id];
+        if (currentItemForPlayback) renderMeta(currentItemForPlayback);
+      }
       return true;
+    } catch (err) {
+      const currentlyListed = !!currentMyList[id];
+      if (currentlyListed) delete currentMyList[id];
+      else currentMyList[id] = true;
+      if (currentItemForPlayback) renderMeta(currentItemForPlayback);
+      throw err;
     } finally {
       myListToggleLockById[id] = false;
     }
@@ -227,11 +239,7 @@
         } catch (e) {
           alert("Liste işlemi başarısız: " + dehlizUserError(e, "Lütfen tekrar deneyin."));
         } finally {
-          if (listBtn.isConnected) {
-            setTimeout(() => {
-              if (listBtn.isConnected) listBtn.disabled = false;
-            }, 120);
-          }
+          if (listBtn.isConnected) listBtn.disabled = false;
         }
       });
     }

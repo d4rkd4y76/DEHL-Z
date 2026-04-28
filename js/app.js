@@ -23,9 +23,7 @@
   let catalogPollTimer = null;
   let liveCatalogAttached = false;
   let activeProfileTab = "account";
-  const MY_LIST_TOGGLE_COOLDOWN_MS = 1200;
   const myListToggleLockById = Object.create(null);
-  const myListToggleLastAtById = Object.create(null);
 
   function openProfileTab(tab) {
     activeProfileTab = tab === "subscription" ? "subscription" : "account";
@@ -747,17 +745,36 @@
 
   async function toggleMyList(id) {
     if (!canUseMyList() || !state.user || !id) return;
-    const now = Date.now();
     if (myListToggleLockById[id]) return false;
-    const lastAt = Number(myListToggleLastAtById[id] || 0);
-    if (now - lastAt < MY_LIST_TOGGLE_COOLDOWN_MS) return false;
 
     myListToggleLockById[id] = true;
     try {
+      const wasListed = !!(state.myList && state.myList[id]);
+      const optimisticAdded = !wasListed;
+      if (!state.myList) state.myList = {};
+      if (optimisticAdded) state.myList[id] = true;
+      else delete state.myList[id];
+      syncRenderedMyListButtons();
+      queueRenderRows();
+      showMyListNotice(optimisticAdded);
+
       const result = await DataService.toggleMyListSecure(id);
-      myListToggleLastAtById[id] = Date.now();
-      showMyListNotice(result && result.added === true);
+      const serverAdded = !!(result && result.added === true);
+      if (serverAdded !== optimisticAdded) {
+        if (serverAdded) state.myList[id] = true;
+        else delete state.myList[id];
+        syncRenderedMyListButtons();
+        queueRenderRows();
+      }
       return true;
+    } catch (err) {
+      // Roll back optimistic state if request fails.
+      const currentlyListed = !!(state.myList && state.myList[id]);
+      if (currentlyListed) delete state.myList[id];
+      else state.myList[id] = true;
+      syncRenderedMyListButtons();
+      queueRenderRows();
+      throw err;
     } finally {
       myListToggleLockById[id] = false;
     }
@@ -781,11 +798,7 @@
     try {
       await toggleMyList(id);
     } finally {
-      if (btn && btn.isConnected) {
-        setTimeout(() => {
-          if (btn.isConnected) btn.disabled = false;
-        }, 120);
-      }
+      if (btn && btn.isConnected) btn.disabled = false;
     }
   }
 
@@ -1404,6 +1417,8 @@
       // Liste toggle sonrasinda tum satirlari yeniden cizmek mobilde kayma yaratabildigi icin,
       // yalnizca gorunen buton metin/siniflarini guncelliyoruz.
       syncRenderedMyListButtons();
+      // "Listeniz" satirinin icerigi degisince ana sayfada anlik guncellenmesi icin yeniden ciz.
+      if (document.getElementById(categoryAnchorId("__my_list__"))) queueRenderRows();
     });
     if (state.profile && state.profile.recovery && state.profile.recovery.mustChangePassword === true) {
       openProfileModal(true);
