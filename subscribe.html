@@ -314,7 +314,7 @@
       }
       .badge-advantage-btn {
         position: absolute;
-        top: 24px;
+        top: 22px;
         right: 12px;
         min-height: 30px;
         padding: 0.26rem 0.58rem;
@@ -337,11 +337,56 @@
         padding: 0.95rem;
         margin-bottom: 0.8rem;
       }
+      .benefit-hero-title {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 800;
+        color: #f8fafc;
+      }
+      .benefit-hero-text {
+        margin: 0.5rem 0 0;
+        color: #d4d4d8;
+        font-size: 0.9rem;
+        line-height: 1.58;
+      }
       .benefit-list {
         margin: 0.6rem 0 0;
         padding-left: 1.1rem;
         color: #e4e4e7;
         line-height: 1.68;
+        font-size: 0.9rem;
+      }
+      .benefit-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.55rem;
+        margin-top: 0.8rem;
+      }
+      .benefit-item {
+        border: 1px solid rgba(148, 163, 184, 0.26);
+        background: rgba(15, 23, 42, 0.36);
+        border-radius: 10px;
+        padding: 0.58rem 0.64rem;
+      }
+      .benefit-item p {
+        margin: 0;
+      }
+      .benefit-item-title {
+        color: #f1f5f9;
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+      .benefit-item-desc {
+        margin-top: 0.24rem !important;
+        color: #cbd5e1;
+        font-size: 0.78rem;
+        line-height: 1.45;
+      }
+      .benefit-note {
+        margin-top: 0.72rem;
+        color: #a1a1aa;
+        font-size: 0.8rem;
+        line-height: 1.5;
       }
       .billing-consent-wrap {
         max-width: 1120px;
@@ -453,18 +498,36 @@
         </div>
         <div class="modal-body">
           <div class="benefit-hero">
-            <strong>Premium üyelik altyapımız Patreon ile çalışır.</strong>
-            <p style="margin: 0.55rem 0 0; color: #e4e4e7">
-              Patreon’da hesap açtıktan sonra abonelik adımını kolayca tamamlarsın; ödeme güvenliği ve üyelik yönetimi profesyonel bir altyapı üzerinden ilerler.
+            <p class="benefit-hero-title">Premium üyelik altyapımız Patreon ile güvenle çalışır.</p>
+            <p class="benefit-hero-text">
+              Abonelik işlemi hızlı ve şeffaf ilerler; ödeme doğrulaması, üyelik yönetimi ve iptal süreci uluslararası standartlarda korunur.
             </p>
           </div>
           <ul class="benefit-list">
-            <li>Güvenli ödeme deneyimi ve doğrulanmış üyelik akışı</li>
-            <li>Abonelik durumunu ve yenilemeyi Patreon panelinden net takip</li>
-            <li>İptal işlemini Patreon üzerinden birkaç adımda tamamlama</li>
-            <li>DEHLİZ hesabında +PLUS erişiminin otomatik senkron görünmesi</li>
+            <li>Ödeme altyapısı Patreon üzerinden güvenli şekilde işlenir.</li>
+            <li>Üyelik durumunu ve yenilemeyi tek panelden takip edebilirsin.</li>
+            <li>İptal işlemi Patreon hesabından birkaç adımda yapılır.</li>
+            <li>DEHLİZ hesabındaki +PLUS erişimi sistemle senkron çalışır.</li>
           </ul>
-          <p class="sub-note">Not: Patreon üzerinden abonelik/ödeme için kullanıcı hesabı gerekir. Hesabın yoksa ödeme sırasında hızlıca oluşturabilirsin.</p>
+          <div class="benefit-grid">
+            <div class="benefit-item">
+              <p class="benefit-item-title">Güvenlik</p>
+              <p class="benefit-item-desc">Ödeme verileri lisanslı ödeme altyapısında korunur.</p>
+            </div>
+            <div class="benefit-item">
+              <p class="benefit-item-title">Şeffaflık</p>
+              <p class="benefit-item-desc">Aktiflik, yenileme ve iptal bilgileri açık biçimde görünür.</p>
+            </div>
+            <div class="benefit-item">
+              <p class="benefit-item-title">Kontrol</p>
+              <p class="benefit-item-desc">Üyelik yönetimi Patreon panelinden kullanıcı kontrolündedir.</p>
+            </div>
+            <div class="benefit-item">
+              <p class="benefit-item-title">Süreklilik</p>
+              <p class="benefit-item-desc">Doğrulanan üyelik sonrası +PLUS erişimi otomatik yansır.</p>
+            </div>
+          </div>
+          <p class="benefit-note">Not: Patreon üzerinden abonelik/ödeme için kullanıcı hesabı gerekir. Hesabın yoksa ödeme sırasında hızlıca oluşturabilirsin.</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-ghost" data-close="patreonBenefitModal">Kapat</button>
