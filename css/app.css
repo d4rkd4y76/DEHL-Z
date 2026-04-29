@@ -183,6 +183,30 @@ button {
   color: var(--text);
 }
 
+.nav-links a.nav-plus-cta {
+  color: #fee2e2;
+  border: 1px solid rgba(248, 113, 113, 0.42);
+  background: linear-gradient(135deg, rgba(127, 29, 29, 0.28), rgba(153, 27, 27, 0.16));
+  border-radius: 999px;
+  padding: 0.34rem 0.72rem;
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.18);
+  transition:
+    color 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s,
+    transform 0.2s;
+}
+
+.nav-links a.nav-plus-cta:hover,
+.nav-links a.nav-plus-cta.active {
+  color: #fff1f2;
+  border-color: rgba(252, 165, 165, 0.68);
+  background: linear-gradient(135deg, rgba(153, 27, 27, 0.36), rgba(185, 28, 28, 0.24));
+  box-shadow: 0 10px 24px rgba(220, 38, 38, 0.24);
+  transform: translateY(-1px);
+}
+
 .nav-tail {
   display: flex;
   align-items: center;

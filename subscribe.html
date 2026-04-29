@@ -69,27 +69,52 @@
       }
       .price-card h2 {
         margin: 0 0 0.5rem;
-        font-size: clamp(1.45rem, 2.7vw, 1.8rem);
+        font-size: clamp(1.24rem, 2.2vw, 1.5rem);
         letter-spacing: -0.01em;
+        line-height: 1.3;
+        display: flex;
+        align-items: center;
+        gap: 0.34rem;
+        flex-wrap: wrap;
+      }
+      .plus-title-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 0;
+        padding: 0.14rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.78em;
+        line-height: 1;
+        font-weight: 900;
+        letter-spacing: 0.05em;
+        color: #fde68a;
+        border: 1px solid rgba(250, 204, 21, 0.5);
+        background: linear-gradient(135deg, rgba(120, 53, 15, 0.4), rgba(234, 179, 8, 0.2));
+        box-shadow:
+          0 4px 12px rgba(250, 204, 21, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.24);
+        transform: translateY(0);
       }
       .price-card .amt {
-        font-size: clamp(2.1rem, 5vw, 2.6rem);
-        font-weight: 900;
+        font-size: clamp(1.72rem, 3.8vw, 2.2rem);
+        font-weight: 800;
         color: #fbbf24;
+        line-height: 1.15;
       }
       .price-sub {
-        margin: 0.2rem 0 0.95rem;
+        margin: 0.35rem 0 0.8rem;
         color: #e4e4e7;
-        font-size: 0.98rem;
-        line-height: 1.5;
+        font-size: 0.96rem;
+        line-height: 1.52;
       }
       .feat {
         list-style: none;
         padding: 0;
-        margin: 1rem 0 0;
+        margin: 0.72rem 0 0;
         color: #d4d4d8;
-        line-height: 1.68;
-        font-size: 0.96rem;
+        line-height: 1.56;
+        font-size: 0.93rem;
       }
       .feat li::before {
         content: "✓ ";
@@ -101,26 +126,34 @@
         margin-top: 1rem;
         min-height: 44px;
       }
+      .plan-buy-btn.is-disabled,
+      .plan-buy-btn:disabled {
+        background: rgba(113, 113, 122, 0.28) !important;
+        color: rgba(228, 228, 231, 0.76) !important;
+        border: 1px solid rgba(161, 161, 170, 0.32);
+        box-shadow: none !important;
+        cursor: not-allowed;
+      }
       .price-card .plan-buy-btn {
         margin-top: auto;
       }
       .plus-badges {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.55rem;
-        margin: 1rem 0 0.9rem;
+        gap: 0.45rem;
+        margin: 0.82rem 0 0.72rem;
       }
       .plus-badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 0.42rem 0.7rem;
+        padding: 0.34rem 0.58rem;
         border-radius: 999px;
         border: 1px solid rgba(255, 255, 255, 0.18);
         background: rgba(255, 255, 255, 0.05);
         color: #f4f4f5;
-        font-size: 0.78rem;
-        font-weight: 760;
+        font-size: 0.74rem;
+        font-weight: 720;
         letter-spacing: 0.02em;
       }
       .plus-badge.ads-free {
@@ -174,7 +207,7 @@
         display: flex;
         gap: 0.62rem;
         flex-wrap: wrap;
-        margin-top: 1rem;
+        margin-top: 0.82rem;
       }
       .sub-consent {
         width: 100%;
@@ -256,19 +289,39 @@
         line-height: 1.58;
       }
       .advantage-btn {
-        border-color: rgba(147, 197, 253, 0.42);
-        color: #bfdbfe;
-        background: linear-gradient(135deg, rgba(37, 99, 235, 0.22), rgba(99, 102, 241, 0.14));
+        border: 1px dashed rgba(148, 163, 184, 0.52);
+        color: #cbd5e1;
+        background: rgba(15, 23, 42, 0.36);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        transition:
+          transform 180ms ease,
+          box-shadow 180ms ease,
+          border-color 180ms ease,
+          color 180ms ease,
+          background 180ms ease;
+      }
+      .advantage-btn:hover {
+        transform: translateY(-1px) scale(1.01);
+        border-color: rgba(148, 163, 184, 0.82);
+        color: #e2e8f0;
+        background: rgba(30, 41, 59, 0.5);
+        box-shadow:
+          0 6px 16px rgba(2, 6, 23, 0.22),
+          inset 0 1px 0 rgba(255, 255, 255, 0.14);
+      }
+      .advantage-btn:active {
+        transform: translateY(0) scale(1);
       }
       .badge-advantage-btn {
         position: absolute;
-        top: 18px;
+        top: 24px;
         right: 12px;
-        min-height: 34px;
-        padding: 0.42rem 0.72rem;
-        font-size: 0.74rem;
+        min-height: 30px;
+        padding: 0.26rem 0.58rem;
+        font-size: 0.68rem;
         border-radius: 999px;
-        font-weight: 800;
+        font-weight: 700;
+        letter-spacing: 0.02em;
         z-index: 2;
       }
       .price-card.recommended {
@@ -349,9 +402,9 @@
     <div class="sub-grid" id="planGrid">
       <div class="price-card recommended">
         <span class="plan-badge best">PATREON</span>
-        <button type="button" class="btn btn-ghost advantage-btn badge-advantage-btn" id="patreonAdvantageBtn">Neden Dehliz+ Premium?</button>
-        <h2>DEHLİZ +PLUS ÜYELİK</h2>
-        <p class="amt">Aylık</p>
+        <button type="button" class="btn btn-ghost advantage-btn badge-advantage-btn" id="patreonAdvantageBtn">Patreon Avantajları</button>
+        <h2>DEHLİZ <span class="plus-title-chip">+PLUS</span> ÜYELİK</h2>
+        <p class="amt">149 ₺</p>
         <p class="price-sub">Korkuyu kesintisiz yaşa: premium içerikler, reklamsız deneyim ve sana özel izleme konforu tek üyelikte.</p>
         <div class="plus-badges" aria-label="+PLUS avantaj rozetleri">
           <span class="plus-badge ads-free">REKLAMSIZ</span>

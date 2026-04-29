@@ -104,6 +104,22 @@
       (cancelPending ? '<p class="sub-note">Uyarı: Abonelik iptal edildiği için dönem sonunda +PLUS kapanacaktır.</p>' : "") +
       supportHtml() +
       "</div>";
+
+    updateSubscribeButtonState(!!isPlus);
+  }
+
+  function updateSubscribeButtonState(isPlus) {
+    const btn = $("startPatreonBtn");
+    if (!btn) return;
+    if (isPlus) {
+      btn.disabled = true;
+      btn.textContent = "Abonesiniz";
+      btn.classList.add("is-disabled");
+    } else {
+      btn.disabled = false;
+      btn.textContent = "Abone Ol";
+      btn.classList.remove("is-disabled");
+    }
   }
 
   function wirePatreonButton() {
@@ -221,6 +237,7 @@
         await DataService.ensureUserProfile(user);
         profile = await DataService.userOnce(user.uid);
       }
+      if (!user) updateSubscribeButtonState(false);
       renderStatus(user, profile);
     });
   }
