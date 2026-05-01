@@ -213,42 +213,6 @@ exports.myListToggle = onRequest({ region: "europe-west1" }, async (req, res) =>
   }
 });
 
-function parsePaddleSignature(headerValue) {
-  const raw = String(headerValue || "");
-  const parts = raw.split(";").map((x) => x.trim());
-  const out = {};
-  parts.forEach((p) => {
-    const idx = p.indexOf("=");
-    if (idx <= 0) return;
-    const k = p.slice(0, idx).trim();
-    const v = p.slice(idx + 1).trim();
-    out[k] = v;
-  });
-  return out;
-}
-
-function verifyPaddleWebhook(req) {
-  const secret = String(process.env.PADDLE_WEBHOOK_SECRET || "").trim();
-  if (!secret) throw new Error("missing_webhook_secret");
-  const sig = parsePaddleSignature(req.get("Paddle-Signature"));
-  if (!sig.ts || !sig.h1) return false;
-  const raw = req.rawBody ? req.rawBody.toString("utf8") : JSON.stringify(req.body || {});
-  const signedPayload = sig.ts + ":" + raw;
-  const hash = crypto.createHmac("sha256", secret).update(signedPayload, "utf8").digest("hex");
-  try {
-    return crypto.timingSafeEqual(Buffer.from(hash, "hex"), Buffer.from(String(sig.h1), "hex"));
-  } catch (_e) {
-    return false;
-  }
-}
-
-function parseMillisFromDateString(value) {
-  const s = String(value || "").trim();
-  if (!s) return 0;
-  const ms = Date.parse(s);
-  return Number.isFinite(ms) ? ms : 0;
-}
-
 function shopierSecretOk(req) {
   const expected = String(process.env.SHOPIER_WEBHOOK_SECRET || "").trim();
   if (!expected) return true;
@@ -257,6 +221,38 @@ function shopierSecretOk(req) {
     String((req.query && req.query.secret) || "").trim() ||
     String((req.body && req.body.secret) || "").trim();
   return incoming && incoming === expected;
+}
+
+function timingSafeStringEq(a, b) {
+  const sa = String(a || "");
+  const sb = String(b || "");
+  if (!sa || !sb) return false;
+  const ba = Buffer.from(sa, "utf8");
+  const bb = Buffer.from(sb, "utf8");
+  if (ba.length !== bb.length) return false;
+  try {
+    return crypto.timingSafeEqual(ba, bb);
+  } catch (_e) {
+    return false;
+  }
+}
+
+function shopierHashOk(req) {
+  const secret = String(process.env.SHOPIER_WEBHOOK_HASH_SECRET || "").trim();
+  if (!secret) return true;
+
+  const incomingHash =
+    String(req.get("x-shopier-hash") || "").trim() ||
+    String(req.get("x-shopier-signature") || "").trim() ||
+    String((req.body && req.body.hash) || "").trim() ||
+    String((req.body && req.body.signature) || "").trim();
+  if (!incomingHash) return false;
+
+  const raw = req.rawBody ? req.rawBody.toString("utf8") : JSON.stringify(req.body || {});
+  const hmacSha256Hex = crypto.createHmac("sha256", secret).update(raw, "utf8").digest("hex");
+  const hmacSha256Base64 = crypto.createHmac("sha256", secret).update(raw, "utf8").digest("base64");
+
+  return timingSafeStringEq(incomingHash, hmacSha256Hex) || timingSafeStringEq(incomingHash, hmacSha256Base64);
 }
 
 function resolveShopierPlanMonths(planKey, rawMonths) {
@@ -326,20 +322,6 @@ async function activateShopierMembership(uid, planKey, months, paymentId, rawDat
   });
 }
 
-function readPaddleUid(eventData) {
-  const data = eventData || {};
-  const direct = data.custom_data && data.custom_data.firebaseUid;
-  if (direct) return String(direct);
-  const passthrough = data.passthrough;
-  if (passthrough) {
-    try {
-      const parsed = typeof passthrough === "string" ? JSON.parse(passthrough) : passthrough;
-      if (parsed && parsed.firebaseUid) return String(parsed.firebaseUid);
-    } catch (_e) {}
-  }
-  return "";
-}
-
 async function findUidByEmail(email) {
   const e = String(email || "").trim();
   if (!e) return "";
@@ -350,91 +332,6 @@ async function findUidByEmail(email) {
     return "";
   }
 }
-
-async function applyPaddleSubscriptionState(uid, payload) {
-  if (!uid) return;
-  const now = Date.now();
-  const sub = payload || {};
-  const nextAt =
-    parseMillisFromDateString(sub.next_billed_at) ||
-    parseMillisFromDateString(sub.current_billing_period && sub.current_billing_period.ends_at) ||
-    parseMillisFromDateString(sub.billing_cycle && sub.billing_cycle.next_billed_at) ||
-    0;
-  const status = String(sub.status || "").toLowerCase();
-  const isActive = ["active", "trialing", "past_due"].includes(status);
-  await admin
-    .database()
-    .ref("users/" + uid)
-    .update({
-      isPro: isActive,
-      subscription: {
-        provider: "paddle",
-        status: status || "unknown",
-        subscriptionId: String(sub.id || ""),
-        renewAt: nextAt || null,
-        cancelAtPeriodEnd: sub.scheduled_change ? sub.scheduled_change.action === "cancel" : false,
-        updatedAt: now
-      }
-    });
-}
-
-exports.paddleWebhook = onRequest({ region: "europe-west1" }, async (req, res) => {
-  if (req.method === "GET") {
-    res.status(200).send("ok");
-    return;
-  }
-  if (req.method !== "POST") {
-    res.status(405).json({ ok: false, message: "Yalnızca POST desteklenir." });
-    return;
-  }
-  if (!verifyPaddleWebhook(req)) {
-    res.status(401).json({ ok: false, message: "İmza doğrulanamadı." });
-    return;
-  }
-  try {
-    const body = req.body || {};
-    const eventType = String(body.event_type || body.eventType || "");
-    const data = body.data || {};
-    let uid = readPaddleUid(data);
-    if (!uid) {
-      uid = await findUidByEmail(data.customer_email || (data.customer && data.customer.email) || "");
-    }
-
-    if (eventType === "transaction.completed") {
-      const nextAt =
-        parseMillisFromDateString(data.billing_cycle && data.billing_cycle.next_billed_at) ||
-        parseMillisFromDateString(data.subscription && data.subscription.next_billed_at) ||
-        0;
-      if (uid) {
-        await admin
-          .database()
-          .ref("users/" + uid)
-          .update({
-            isPro: true,
-            subscription: {
-              provider: "paddle",
-              status: "active",
-              renewAt: nextAt || null,
-              lastTransactionId: String(data.id || ""),
-              updatedAt: Date.now()
-            }
-          });
-      }
-    } else if (
-      eventType === "subscription.created" ||
-      eventType === "subscription.updated" ||
-      eventType === "subscription.activated" ||
-      eventType === "subscription.past_due" ||
-      eventType === "subscription.canceled"
-    ) {
-      await applyPaddleSubscriptionState(uid, data);
-    }
-
-    res.status(200).json({ ok: true });
-  } catch (_err) {
-    res.status(500).json({ ok: false, message: "Webhook işlenemedi." });
-  }
-});
 
 exports.shopierWebhook = onRequest({ region: "europe-west1" }, async (req, res) => {
   cors(res);
@@ -452,6 +349,10 @@ exports.shopierWebhook = onRequest({ region: "europe-west1" }, async (req, res) 
   }
   if (!shopierSecretOk(req)) {
     res.status(401).json({ ok: false, message: "Webhook gizli anahtarı doğrulanamadı." });
+    return;
+  }
+  if (!shopierHashOk(req)) {
+    res.status(401).json({ ok: false, message: "Webhook hash doğrulaması başarısız." });
     return;
   }
 

@@ -21,19 +21,19 @@ window.DEHLIZ_CONFIG = window.DEHLIZ_CONFIG || {
       plus_1m: {
         label: "1 Aylık +PLUS",
         months: 1,
-        priceTl: 120,
+        priceTl: 119,
         checkoutUrl: ""
       },
       plus_2m: {
         label: "2 Aylık +PLUS",
         months: 2,
-        priceTl: 200,
+        priceTl: 199,
         checkoutUrl: ""
       },
       plus_3m: {
         label: "3 Aylık +PLUS",
         months: 3,
-        priceTl: 250,
+        priceTl: 249,
         checkoutUrl: ""
       }
     }
