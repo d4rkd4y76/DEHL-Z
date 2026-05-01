@@ -17,9 +17,30 @@
         margin: 0 auto;
         display: grid;
         gap: 1rem;
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         padding: 0 4% 3.2rem;
         align-items: stretch;
+      }
+      @media (max-width: 980px) {
+        .sub-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 760px) {
+        .sub-grid {
+          display: flex;
+          gap: 0.75rem;
+          overflow-x: auto;
+          overscroll-behavior-x: contain;
+          scroll-snap-type: x mandatory;
+          touch-action: pan-x;
+          padding: 0 4% 1.2rem;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+        .sub-grid::-webkit-scrollbar {
+          display: none;
+        }
       }
       @media (max-width: 720px) {
         .sub-hero {
@@ -40,8 +61,20 @@
         display: flex;
         flex-direction: column;
       }
+      .price-card.advantage {
+        border-color: rgba(96, 165, 250, 0.45);
+        box-shadow:
+          0 22px 58px rgba(0, 0, 0, 0.44),
+          0 0 0 1px rgba(96, 165, 250, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
       .price-card.recommended {
         border-color: rgba(250, 204, 21, 0.42);
+        box-shadow:
+          0 28px 66px rgba(0, 0, 0, 0.55),
+          0 0 0 1px rgba(250, 204, 21, 0.28),
+          0 0 24px rgba(250, 204, 21, 0.24),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
       }
       .plan-badge {
         position: absolute;
@@ -69,52 +102,27 @@
       }
       .price-card h2 {
         margin: 0 0 0.5rem;
-        font-size: clamp(1.24rem, 2.2vw, 1.5rem);
+        font-size: clamp(1.45rem, 2.7vw, 1.8rem);
         letter-spacing: -0.01em;
-        line-height: 1.3;
-        display: flex;
-        align-items: center;
-        gap: 0.34rem;
-        flex-wrap: wrap;
-      }
-      .plus-title-chip {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: 0;
-        padding: 0.14rem 0.5rem;
-        border-radius: 999px;
-        font-size: 0.78em;
-        line-height: 1;
-        font-weight: 900;
-        letter-spacing: 0.05em;
-        color: #fde68a;
-        border: 1px solid rgba(250, 204, 21, 0.5);
-        background: linear-gradient(135deg, rgba(120, 53, 15, 0.4), rgba(234, 179, 8, 0.2));
-        box-shadow:
-          0 4px 12px rgba(250, 204, 21, 0.18),
-          inset 0 1px 0 rgba(255, 255, 255, 0.24);
-        transform: translateY(0);
       }
       .price-card .amt {
-        font-size: clamp(1.72rem, 3.8vw, 2.2rem);
-        font-weight: 800;
+        font-size: clamp(2.1rem, 5vw, 2.6rem);
+        font-weight: 900;
         color: #fbbf24;
-        line-height: 1.15;
       }
       .price-sub {
-        margin: 0.35rem 0 0.8rem;
+        margin: 0.2rem 0 0.95rem;
         color: #e4e4e7;
-        font-size: 0.96rem;
-        line-height: 1.52;
+        font-size: 0.98rem;
+        line-height: 1.5;
       }
       .feat {
         list-style: none;
         padding: 0;
-        margin: 0.72rem 0 0;
+        margin: 1rem 0 0;
         color: #d4d4d8;
-        line-height: 1.56;
-        font-size: 0.93rem;
+        line-height: 1.68;
+        font-size: 0.96rem;
       }
       .feat li::before {
         content: "✓ ";
@@ -126,34 +134,26 @@
         margin-top: 1rem;
         min-height: 44px;
       }
-      .plan-buy-btn.is-disabled,
-      .plan-buy-btn:disabled {
-        background: rgba(113, 113, 122, 0.28) !important;
-        color: rgba(228, 228, 231, 0.76) !important;
-        border: 1px solid rgba(161, 161, 170, 0.32);
-        box-shadow: none !important;
-        cursor: not-allowed;
-      }
       .price-card .plan-buy-btn {
         margin-top: auto;
       }
       .plus-badges {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.45rem;
-        margin: 0.82rem 0 0.72rem;
+        gap: 0.55rem;
+        margin: 1rem 0 0.9rem;
       }
       .plus-badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 0.34rem 0.58rem;
+        padding: 0.42rem 0.7rem;
         border-radius: 999px;
         border: 1px solid rgba(255, 255, 255, 0.18);
         background: rgba(255, 255, 255, 0.05);
         color: #f4f4f5;
-        font-size: 0.74rem;
-        font-weight: 720;
+        font-size: 0.78rem;
+        font-weight: 760;
         letter-spacing: 0.02em;
       }
       .plus-badge.ads-free {
@@ -207,7 +207,7 @@
         display: flex;
         gap: 0.62rem;
         flex-wrap: wrap;
-        margin-top: 0.82rem;
+        margin-top: 1rem;
       }
       .sub-consent {
         width: 100%;
@@ -288,136 +288,96 @@
         font-size: 0.9rem;
         line-height: 1.58;
       }
-      .advantage-btn {
-        border: 1px solid rgba(125, 211, 252, 0.38);
-        color: #bae6fd;
-        background: rgba(2, 132, 199, 0.12);
-        box-shadow:
-          inset 0 1px 0 rgba(255, 255, 255, 0.12),
-          0 4px 12px rgba(2, 132, 199, 0.14);
-        transition:
-          transform 180ms ease,
-          box-shadow 180ms ease,
-          border-color 180ms ease,
-          color 180ms ease,
-          background 180ms ease;
-      }
-      .advantage-btn::before {
-        content: "i";
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 16px;
-        height: 16px;
-        margin-right: 0.34rem;
-        border-radius: 999px;
-        border: 1px solid rgba(186, 230, 253, 0.55);
-        color: #e0f2fe;
-        font-size: 0.64rem;
-        font-weight: 800;
-        line-height: 1;
-      }
-      .advantage-btn:hover {
-        transform: translateY(-1px) scale(1.01);
-        border-color: rgba(125, 211, 252, 0.64);
-        color: #e0f2fe;
-        background: rgba(2, 132, 199, 0.2);
-        box-shadow:
-          0 8px 18px rgba(2, 132, 199, 0.2),
-          inset 0 1px 0 rgba(255, 255, 255, 0.14);
-      }
-      .advantage-btn:active {
-        transform: translateY(0) scale(1);
-      }
-      .badge-advantage-btn {
-        position: absolute;
-        top: 22px;
-        right: 12px;
-        min-height: 30px;
-        padding: 0.26rem 0.58rem;
-        font-size: 0.68rem;
-        border-radius: 999px;
-        font-weight: 700;
-        letter-spacing: 0.02em;
-        z-index: 2;
-      }
-      .price-card.recommended {
-        padding-top: 3.4rem;
-      }
-      .benefit-modal .modal {
-        max-width: 620px;
-      }
-      .benefit-hero {
-        border: 1px solid rgba(251, 191, 36, 0.35);
-        background: linear-gradient(160deg, rgba(251, 191, 36, 0.14), rgba(30, 41, 59, 0.28));
-        border-radius: 12px;
-        padding: 0.95rem;
-        margin-bottom: 0.8rem;
-      }
-      .benefit-hero-title {
-        margin: 0;
-        font-size: 1rem;
-        font-weight: 800;
-        color: #f8fafc;
-      }
-      .benefit-hero-text {
-        margin: 0.5rem 0 0;
-        color: #d4d4d8;
-        font-size: 0.9rem;
-        line-height: 1.58;
-      }
-      .benefit-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.55rem;
-        margin-top: 0.8rem;
-      }
-      .benefit-item {
-        border: 1px solid rgba(148, 163, 184, 0.26);
-        background: rgba(15, 23, 42, 0.36);
-        border-radius: 10px;
-        padding: 0.58rem 0.64rem;
-      }
-      .benefit-item p {
-        margin: 0;
-      }
-      .benefit-item-title {
-        color: #f1f5f9;
-        font-size: 0.8rem;
-        font-weight: 700;
-      }
-      .benefit-item-desc {
-        margin-top: 0.24rem !important;
-        color: #cbd5e1;
-        font-size: 0.78rem;
-        line-height: 1.45;
-      }
-      .benefit-note {
-        margin-top: 0.72rem;
-        color: #a1a1aa;
-        font-size: 0.8rem;
-        line-height: 1.5;
-      }
-      .billing-consent-wrap {
-        max-width: 1120px;
-        margin: 0 auto 2.2rem;
-        padding: 0 4%;
-      }
-      .billing-consent-card {
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.03);
-        padding: 0.95rem 1rem;
-      }
       .purchase-consent-plan {
         margin: 0.2rem 0 0.8rem;
         color: #e4e4e7;
         font-size: 0.9rem;
       }
+      .plan-carousel-toolbar {
+        max-width: 1120px;
+        margin: 0 auto 0.55rem;
+        padding: 0 4%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.65rem;
+      }
+      .plan-carousel-hint {
+        color: #a1a1aa;
+        font-size: 0.84rem;
+      }
+      .plan-carousel-actions {
+        display: flex;
+        gap: 0.42rem;
+      }
+      .plan-carousel-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.08);
+        color: #f4f4f5;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .plan-carousel-btn:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
       @media (max-width: 760px) {
         .price-card {
+          scroll-snap-align: start;
+          flex: 0 0 min(84vw, 320px);
+          min-height: 100%;
           padding: 1rem 0.95rem 0.9rem;
           border-radius: 14px;
+        }
+        .plan-badge {
+          top: 8px;
+          right: 10px;
+          font-size: 0.62rem;
+          padding: 0.22rem 0.48rem;
+          z-index: 2;
+        }
+        .price-card h2 {
+          font-size: 1.16rem;
+          margin-bottom: 0.35rem;
+        }
+        .price-card .amt {
+          font-size: 2rem;
+          line-height: 1.1;
+        }
+        .price-sub {
+          font-size: 0.86rem;
+          margin: 0.25rem 0 0.55rem;
+        }
+        .plus-badges {
+          margin: 0.55rem 0 0.6rem;
+          gap: 0.35rem;
+        }
+        .plus-badge {
+          font-size: 0.64rem;
+          padding: 0.25rem 0.45rem;
+        }
+        .feat {
+          font-size: 0.87rem;
+          line-height: 1.45;
+        }
+        .plan-buy-btn {
+          min-height: 38px;
+          font-size: 0.84rem;
+        }
+        .plan-carousel-toolbar {
+          margin-bottom: 0.45rem;
+        }
+        .plan-carousel-hint {
+          font-size: 0.76rem;
+        }
+      }
+      @media (min-width: 761px) {
+        .plan-carousel-toolbar {
+          display: none;
         }
       }
     </style>
@@ -448,19 +408,25 @@
     <section class="sub-hero">
       <h1 style="font-size: clamp(2rem, 4vw, 2.75rem); margin: 0 0 0.5rem">DEHLİZ +Plus</h1>
       <p style="color: var(--muted); max-width: 560px; line-height: 1.6; margin: 0">
-        Tek abonelik modeliyle Patreon üzerinden abone ol, +PLUS ayrıcalıklarını hemen aç ve üyelik durumunu bu ekrandan anlık takip et.
+        Shopier ile tek seferlik ödeme yap, seçtiğin süre boyunca +PLUS ayrıcalıklarını hemen kullan.
       </p>
     </section>
 
     <div class="status-box" id="statusBox"></div>
 
+    <div class="plan-carousel-toolbar" id="planCarouselToolbar" aria-label="Paket gezinme">
+      <div class="plan-carousel-hint" id="planCarouselHint">Sağa sola kaydırarak avantajlı paketleri gör.</div>
+      <div class="plan-carousel-actions">
+        <button type="button" class="plan-carousel-btn" id="planPrevBtn" aria-label="Önceki paket">‹</button>
+        <button type="button" class="plan-carousel-btn" id="planNextBtn" aria-label="Sonraki paket">›</button>
+      </div>
+    </div>
+
     <div class="sub-grid" id="planGrid">
-      <div class="price-card recommended">
-        <span class="plan-badge best">PATREON</span>
-        <button type="button" class="btn btn-ghost advantage-btn badge-advantage-btn" id="patreonAdvantageBtn">Patreon Avantajları</button>
-        <h2>DEHLİZ <span class="plus-title-chip">+PLUS</span> ÜYELİK</h2>
-        <p class="amt">149 ₺</p>
-        <p class="price-sub">Korkuyu kesintisiz yaşa: premium içerikler, reklamsız deneyim ve sana özel izleme konforu tek üyelikte.</p>
+      <div class="price-card">
+        <h2>1 Aylık +PLUS</h2>
+        <p class="amt">120 ₺</p>
+        <p class="price-sub">Kısa süreli +PLUS erişimi için hızlı başlangıç paketi.</p>
         <div class="plus-badges" aria-label="+PLUS avantaj rozetleri">
           <span class="plus-badge ads-free">REKLAMSIZ</span>
           <span class="plus-badge bg-play">ARKA PLANDA OYNATMA</span>
@@ -468,15 +434,55 @@
           <span class="plus-badge my-list">LİSTENE EKLE</span>
         </div>
         <ul class="feat">
-          <li>Patreon ile güvenli ve hızlı abonelik akışı</li>
-          <li>+PLUS videolara tam erişim ve reklamsız izleme</li>
-          <li>Üyelik durumu, yenileme ve iptal bilgileri hesap ekranında görünür</li>
-          <li>İptal edilmedikçe son gün uyarısı gösterilmez</li>
+          <li>30 gün +PLUS erişimi</li>
+          <li>+PLUS videolara tam erişim</li>
+          <li>Listene ekle / kişisel arşiv</li>
+          <li>Arka planda oynatma</li>
+          <li>Reklamsız deneyim</li>
         </ul>
-        <div class="status-actions">
-          <button type="button" class="btn btn-primary plan-buy-btn" id="startPatreonBtn">Abone Ol</button>
-          <button type="button" class="btn btn-ghost plan-buy-btn" id="managePatreonBtn">Patreon Üyeliğimi Yönet</button>
+        <button type="button" class="btn btn-primary plan-buy-btn shopier-buy-btn" data-plan="plus_1m">1 Aylık Al</button>
+      </div>
+
+      <div class="price-card advantage">
+        <span class="plan-badge advantage">AVANTAJLI</span>
+        <h2>2 Aylık +PLUS</h2>
+        <p class="amt">200 ₺</p>
+        <p class="price-sub">Fiyat avantajı isteyenler için daha dengeli paket.</p>
+        <div class="plus-badges" aria-label="+PLUS avantaj rozetleri">
+          <span class="plus-badge ads-free">REKLAMSIZ</span>
+          <span class="plus-badge bg-play">ARKA PLANDA OYNATMA</span>
+          <span class="plus-badge plus-access">+PLUS VİDEOLARA ERİŞİM</span>
+          <span class="plus-badge my-list">LİSTENE EKLE</span>
         </div>
+        <ul class="feat">
+          <li>60 gün +PLUS erişimi</li>
+          <li>+PLUS videolara tam erişim</li>
+          <li>Listene ekle / kişisel arşiv</li>
+          <li>Arka planda oynatma</li>
+          <li>Reklamsız deneyim</li>
+        </ul>
+        <button type="button" class="btn btn-primary plan-buy-btn shopier-buy-btn" data-plan="plus_2m">2 Aylık Al</button>
+      </div>
+
+      <div class="price-card recommended">
+        <span class="plan-badge best">EN İYİ SEÇENEK</span>
+        <h2>3 Aylık +PLUS</h2>
+        <p class="amt">250 ₺</p>
+        <p class="price-sub">En yüksek fiyat/performans. Uzun süreli +PLUS deneyimi.</p>
+        <div class="plus-badges" aria-label="+PLUS avantaj rozetleri">
+          <span class="plus-badge ads-free">REKLAMSIZ</span>
+          <span class="plus-badge bg-play">ARKA PLANDA OYNATMA</span>
+          <span class="plus-badge plus-access">+PLUS VİDEOLARA ERİŞİM</span>
+          <span class="plus-badge my-list">LİSTENE EKLE</span>
+        </div>
+        <ul class="feat">
+          <li>90 gün +PLUS erişimi</li>
+          <li>+PLUS videolara tam erişim</li>
+          <li>Listene ekle / kişisel arşiv</li>
+          <li>Arka planda oynatma</li>
+          <li>Reklamsız deneyim</li>
+        </ul>
+        <button type="button" class="btn btn-primary plan-buy-btn shopier-buy-btn" data-plan="plus_3m">3 Aylık Al</button>
       </div>
     </div>
 
@@ -500,54 +506,14 @@
       </div>
     </div>
 
-    <div class="modal-backdrop benefit-modal" id="patreonBenefitModal">
+    <div class="modal-backdrop" id="purchaseConsentModal">
       <div class="modal">
         <div class="modal-header">
-          <h2>Patreon ile Güvenli Ödeme</h2>
-          <button type="button" class="modal-close" data-close="patreonBenefitModal">&times;</button>
+          <h2>Üyelik Onayı</h2>
+          <button type="button" class="modal-close" data-close="purchaseConsentModal">&times;</button>
         </div>
         <div class="modal-body">
-          <div class="benefit-hero">
-            <p class="benefit-hero-title">Premium üyelik altyapımız Patreon ile güvenle çalışır.</p>
-            <p class="benefit-hero-text">
-              Abonelik işlemi hızlı ve şeffaf ilerler; ödeme doğrulaması, üyelik yönetimi ve iptal süreci uluslararası standartlarda korunur.
-            </p>
-          </div>
-          <div class="benefit-grid">
-            <div class="benefit-item">
-              <p class="benefit-item-title">Güvenlik</p>
-              <p class="benefit-item-desc">Ödeme verileri lisanslı ödeme altyapısında korunur.</p>
-            </div>
-            <div class="benefit-item">
-              <p class="benefit-item-title">Şeffaflık</p>
-              <p class="benefit-item-desc">Aktiflik, yenileme ve iptal bilgileri açık biçimde görünür.</p>
-            </div>
-            <div class="benefit-item">
-              <p class="benefit-item-title">Kontrol</p>
-              <p class="benefit-item-desc">Üyelik yönetimi Patreon panelinden kullanıcı kontrolündedir.</p>
-            </div>
-            <div class="benefit-item">
-              <p class="benefit-item-title">Süreklilik</p>
-              <p class="benefit-item-desc">Doğrulanan üyelik sonrası +PLUS erişimi otomatik yansır.</p>
-            </div>
-          </div>
-          <p class="benefit-note">Not: Patreon üzerinden abonelik/ödeme için kullanıcı hesabı gerekir. Hesabın yoksa ödeme sırasında hızlıca oluşturabilirsin.</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-ghost" data-close="patreonBenefitModal">Kapat</button>
-          <button type="button" class="btn btn-primary" id="benefitModalStartBtn">Abone Ol</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal-backdrop" id="consentModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>Ödeme Öncesi Onay</h2>
-          <button type="button" class="modal-close" data-close="consentModal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <p class="status-sub" style="margin-top: 0">Patreon ödeme ekranına geçmeden önce yasal metinleri onaylamanız gerekir.</p>
+          <p class="purchase-consent-plan" id="purchaseConsentPlan">Seçilen paket: -</p>
           <label class="sub-consent" for="billingConsent">
             <input id="billingConsent" type="checkbox" />
             <span>
@@ -555,10 +521,13 @@
               <a href="refund-policy.html" target="_blank" rel="noopener">Üyelik İptal/İade Koşulları</a> metinlerini okudum, kabul ediyorum.
             </span>
           </label>
+          <p class="sub-note" style="margin-top: 0.8rem">
+            Bu ödeme tek seferlik üyelik paketidir. Otomatik yenileme yapılmaz.
+          </p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-ghost" data-close="consentModal">Vazgeç</button>
-          <button type="button" class="btn btn-primary" id="consentContinueBtn">Patreon'a Devam Et</button>
+          <button type="button" class="btn btn-ghost" data-close="purchaseConsentModal">Vazgeç</button>
+          <button type="button" class="btn btn-primary" id="purchaseConsentContinue">Devam et</button>
         </div>
       </div>
     </div>
@@ -569,6 +538,6 @@
     <script src="js/config.js"></script>
     <script src="js/core.js"></script>
     <script src="js/data-service.js"></script>
-    <script src="js/subscribe-patreon.js"></script>
+    <script src="js/subscribe.js"></script>
   </body>
 </html>

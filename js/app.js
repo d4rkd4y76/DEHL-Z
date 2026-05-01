@@ -22,6 +22,8 @@
   let contentRefreshTimer = null;
   let catalogPollTimer = null;
   let liveCatalogAttached = false;
+  let profileUrgencyTicker = null;
+  let profileUrgencyShowDays = false;
   let activeProfileTab = "account";
   const myListToggleLockById = Object.create(null);
 
@@ -159,6 +161,57 @@
     } catch (_e) {}
   }
 
+  function plusUrgency(profile) {
+    const expiresAt = readRenewalAt(profile);
+    const left = daysLeftTo(expiresAt);
+    return {
+      urgent: left != null && left >= 0 && left <= 5,
+      daysLeft: left
+    };
+  }
+
+  function stopProfileUrgencyTicker() {
+    if (profileUrgencyTicker) {
+      clearInterval(profileUrgencyTicker);
+      profileUrgencyTicker = null;
+    }
+    profileUrgencyShowDays = false;
+  }
+
+  function ensureProfileUrgencyTicker(profileBtn) {
+    if (profileUrgencyTicker) return;
+    profileUrgencyTicker = setInterval(() => {
+      profileUrgencyShowDays = !profileUrgencyShowDays;
+      if (!profileBtn || !profileBtn.isConnected) return;
+      profileBtn.classList.toggle("is-days", profileUrgencyShowDays);
+    }, 10000);
+  }
+
+  async function maybeShowPlusExpiryReminder(profile) {
+    if (!state.user || !isPlusMember(profile)) return;
+    const expiresAt = readRenewalAt(profile);
+    const daysLeft = daysLeftTo(expiresAt);
+    if (daysLeft == null || daysLeft > 5 || daysLeft < 0) return;
+    const key = "dehliz.plus-expiry.shown." + state.user.uid;
+    if (safeSessionGet(key) === "1") return;
+    safeSessionSet(key, "1");
+    const dateText = expiresAt ? new Date(expiresAt).toLocaleDateString("tr-TR") : "-";
+    const goRenew = await openUiDialog({
+      title: "+PLUS Süre Uyarısı",
+      message:
+        "Üyeliğinizin bitmesine " +
+        daysLeft +
+        " gün kaldı (bitiş: " +
+        dateText +
+        "). Süre kesintisi yaşamamak için paketinizi yenileyebilirsiniz.",
+      buttons: [
+        { label: "Kapat", value: false, className: "btn-ghost" },
+        { label: "Paketleri Gör", value: true, className: "btn-primary" }
+      ]
+    });
+    if (goRenew) window.location.href = "subscribe.html";
+  }
+
   function renderSubscriptionPanel() {
     const badge = $("subPlanBadge");
     const renew = $("subRenewText");
@@ -167,8 +220,7 @@
     const profile = state.profile || {};
     const isPlus = isPlusMember(profile);
     const sub = profile.subscription || {};
-    const provider = String(sub.provider || "").toLowerCase() || "patreon";
-    const cancelPending = sub.cancelAtPeriodEnd === true || String(sub.status || "").toLowerCase() === "cancel_pending";
+    const provider = String(sub.provider || "").toLowerCase() || "shopier";
 
     badge.classList.remove("plus", "free");
     if (isPlus) {
@@ -190,9 +242,6 @@
         " • Bitiş: " +
         (renewalAt ? new Date(renewalAt).toLocaleDateString("tr-TR") : "-") +
         (left != null ? " • Kalan süre: " + (left >= 0 ? left + " gün" : "süre doldu") : "");
-    }
-    if (isPlus && cancelPending) {
-      renewLine += " • Üyelik iptal edildi: Süre sonunda +PLUS erişimi kapanacak.";
     }
     renew.textContent = renewLine;
     const planRaw = String(sub.plan || "").trim();
@@ -229,9 +278,7 @@
       '">' +
       leftText +
       '</p></div>' +
-      '<div class="sub-meta-item"><p class="sub-meta-label">Yenileme</p><p class="sub-meta-value">' +
-      (cancelPending ? "İptal edildi (dönem sonu)" : "Otomatik yenilenir") +
-      "</p></div>";
+      '<div class="sub-meta-item"><p class="sub-meta-label">Yenileme</p><p class="sub-meta-value">Otomatik yenileme yok</p></div>';
 
   }
 
@@ -364,7 +411,7 @@
     }, 1900);
   }
 
-  // Patreon tek abonelik modelinde son 5 gun popup akisi kullanilmiyor.
+  // Shopier tek seferlik paket modelinde son 5 gün popup akışı kullanılmıyor.
 
   function normalizeCategoryLabel(v) {
     return String(v || "")
@@ -1392,11 +1439,20 @@
     const pro = isPlusMember(state.profile);
     const proEl = $("proChip");
     if (proEl) proEl.style.display = "none";
+    const urgency = plusUrgency(state.profile);
     const profileBtn = $("btnProfile");
     if (profileBtn) {
       profileBtn.classList.toggle("btn-profile-plus", pro);
-      profileBtn.classList.remove("btn-profile-urgent", "is-days");
-      profileBtn.removeAttribute("data-days-left");
+      profileBtn.classList.toggle("btn-profile-urgent", urgency.urgent);
+      if (urgency.urgent) {
+        profileBtn.setAttribute("data-days-left", String(urgency.daysLeft));
+        profileBtn.classList.toggle("is-days", profileUrgencyShowDays);
+        ensureProfileUrgencyTicker(profileBtn);
+      } else {
+        profileBtn.removeAttribute("data-days-left");
+        profileBtn.classList.remove("is-days");
+        stopProfileUrgencyTicker();
+      }
     }
     const userBlock = $("navUserBlock");
     if (userBlock) userBlock.classList.toggle("nav-user--hidden", !u);
@@ -1405,6 +1461,7 @@
 
   async function refreshProfile() {
     if (!state.user) {
+      safeSessionRemoveByPrefix("dehliz.plus-expiry.shown.");
       state.profile = null;
       state.isAdmin = false;
       state.myList = {};
@@ -1434,6 +1491,7 @@
     }
     updateAuthUi();
     renderSubscriptionPanel();
+    maybeShowPlusExpiryReminder(state.profile);
     queueRenderRows();
   }
 
@@ -1512,7 +1570,30 @@
       $("authModal").classList.add("open");
     });
     $("btnLogout").addEventListener("click", () => dehlizSignOut());
-    $("btnProfile").addEventListener("click", () => openProfileModal(false));
+    $("btnProfile").addEventListener("click", async () => {
+      const urgency = plusUrgency(state.profile);
+      if (!urgency.urgent) {
+        openProfileModal(false);
+        return;
+      }
+      const goRenew = await openUiDialog({
+        title: "+PLUS Süre Uyarısı",
+        message:
+          "Üyeliğinizin bitmesine " +
+          urgency.daysLeft +
+          " gün kaldı. Yenileme için +PLUS paket ekranına gidebilir veya üyelik detayınızı görüntüleyebilirsiniz.",
+        buttons: [
+          { label: "Abonelik Detayı", value: false, className: "btn-ghost" },
+          { label: "Paketleri Gör", value: true, className: "btn-primary" }
+        ]
+      });
+      if (goRenew) {
+        window.location.href = "subscribe.html";
+        return;
+      }
+      openProfileModal(false);
+      openProfileTab("subscription");
+    });
     $("btnSaveProfile").addEventListener("click", saveProfile);
     document.querySelectorAll("[data-profile-tab]").forEach((btn) => {
       btn.addEventListener("click", () => {
