@@ -134,8 +134,8 @@
       return;
     }
 
-    const pro = normalizeBool(profile && profile.isPro);
     const renewAt = readRenewalAt(profile);
+    const pro = normalizeBool(profile && profile.isPro) && !(renewAt && Date.now() > renewAt);
     const left = daysUntil(renewAt);
 
     if (pro) {

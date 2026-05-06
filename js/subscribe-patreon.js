@@ -76,8 +76,8 @@
     }
 
     const sub = (profile && profile.subscription) || {};
-    const isPlus = normalizeBool(profile && profile.isPro);
     const renewAt = readRenewalAt(profile);
+    const isPlus = normalizeBool(profile && profile.isPro) && !(renewAt && Date.now() > renewAt);
     const daysLeft = daysUntil(renewAt);
     const cancelPending = sub.cancelAtPeriodEnd === true || String(sub.status || "").toLowerCase() === "cancel_pending";
 

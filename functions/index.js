@@ -171,8 +171,19 @@ exports.myListToggle = onRequest({ region: "europe-west1" }, async (req, res) =>
     const email = String(authUser.email || "").toLowerCase();
     const ownerEmail = String(ownerSnap.val() || "").toLowerCase();
     const isAdmin = adminSnap.val() === true || !!(email && ownerEmail && email === ownerEmail);
-    const isPro = profile.isPro === true || profile.isPro === 1 || profile.isPro === "1";
-    if (!isAdmin && !isPro) {
+    const proFlag = profile.isPro === true || profile.isPro === 1 || profile.isPro === "1";
+    const sub = profile.subscription || {};
+    const expiryCandidates = [sub.nextBillingAt, sub.renewAt, sub.expiresAt, sub.plusUntil, profile.renewAt, profile.expiresAt, profile.plusUntil];
+    let expiryAt = 0;
+    for (let i = 0; i < expiryCandidates.length; i++) {
+      const n = Number(expiryCandidates[i]);
+      if (Number.isFinite(n) && n > 0) {
+        expiryAt = n;
+        break;
+      }
+    }
+    const isProActive = proFlag && !(expiryAt && Date.now() > expiryAt);
+    if (!isAdmin && !isProActive) {
       res.status(403).json({ ok: false, message: "Bu özellik +PLUS üyeliklerde açılır." });
       return;
     }

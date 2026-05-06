@@ -356,7 +356,12 @@
   function isPlusMember(profile) {
     if (!profile) return false;
     const v = profile.isPro;
-    return v === true || v === 1 || v === "1" || String(v).toLowerCase() === "true";
+    const pro = v === true || v === 1 || v === "1" || String(v).toLowerCase() === "true";
+    if (!pro) return false;
+    // Süre alanı varsa ve geçmişse +PLUS pasif say.
+    const expiry = readRenewalAt(profile);
+    if (expiry && Number.isFinite(expiry) && expiry > 0 && Date.now() > expiry) return false;
+    return true;
   }
 
   function isProContent(item) {

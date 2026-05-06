@@ -590,7 +590,6 @@
     $("usersInfo").textContent = entries.length + " kullanıcı listelendi. Seçili: " + selectedCount;
     entries.forEach(([uid, v]) => {
       const tr = document.createElement("tr");
-      const pro = v.isPro === true;
       const sub = v.subscription || {};
       const expiryCandidates = [sub.expiresAt, sub.renewAt, v.expiresAt, v.plusUntil];
       let expiryAt = 0;
@@ -601,6 +600,7 @@
           break;
         }
       }
+      const pro = v.isPro === true && !(expiryAt && Date.now() > expiryAt);
       const leftDays = expiryAt ? Math.ceil((expiryAt - Date.now()) / (24 * 60 * 60 * 1000)) : null;
       const leftText =
         leftDays == null

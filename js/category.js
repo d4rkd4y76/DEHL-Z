@@ -20,10 +20,25 @@
     __plus__: "+Plus"
   };
 
+  function readRenewalAt(profile) {
+    if (!profile) return 0;
+    const sub = profile.subscription || {};
+    const candidates = [sub.nextBillingAt, sub.renewAt, sub.expiresAt, sub.plusUntil, profile.renewAt, profile.expiresAt, profile.plusUntil];
+    for (let i = 0; i < candidates.length; i++) {
+      const n = Number(candidates[i]);
+      if (Number.isFinite(n) && n > 0) return n;
+    }
+    return 0;
+  }
+
   function isPlusMember(profile) {
     if (!profile) return false;
     const v = profile.isPro;
-    return v === true || v === 1 || v === "1" || String(v).toLowerCase() === "true";
+    const pro = v === true || v === 1 || v === "1" || String(v).toLowerCase() === "true";
+    if (!pro) return false;
+    const expiry = readRenewalAt(profile);
+    if (expiry && Number.isFinite(expiry) && expiry > 0 && Date.now() > expiry) return false;
+    return true;
   }
 
   function isProContent(item) {
