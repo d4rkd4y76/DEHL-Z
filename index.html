@@ -4,33 +4,36 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DEHLİZ — Türkiye'nin Premium Korku Platformu</title>
+    <link
+      rel="preload"
+      as="image"
+      href="https://dehliz.b-cdn.net/videolarda%20giri%C5%9F%20logo.png"
+    />
     <link rel="stylesheet" href="css/app.css" />
   </head>
   <body>
     <div id="loading" class="loading-screen">
       <div class="loading-fog"></div>
+      <div class="loading-vignette" aria-hidden="true"></div>
       <div class="loading-brand">
-        <div class="loading-logo-wrap">
-          <img
-            src="https://dehliz.b-cdn.net/videolarda%20giri%C5%9F%20logo.png"
-            alt="DEHLİZ"
-            class="loading-logo loading-logo-base"
-            loading="eager"
-          />
+        <div class="loading-logo-wrap" aria-hidden="true">
+          <span class="loading-ring loading-ring-outer"></span>
+          <span class="loading-ring loading-ring-inner"></span>
+          <span class="loading-pulse"></span>
           <img
             src="https://dehliz.b-cdn.net/videolarda%20giri%C5%9F%20logo.png"
             alt=""
-            class="loading-logo loading-logo-fill"
+            class="loading-logo"
             loading="eager"
-            aria-hidden="true"
           />
         </div>
         <div class="loading-wordmark" data-text="DEHLİZ">
           <span class="loading-wordmark-base">DEHLİZ</span>
-          <span class="loading-wordmark-fill" aria-hidden="true">DEHLİZ</span>
+          <span class="loading-wordmark-glow" aria-hidden="true">DEHLİZ</span>
         </div>
       </div>
       <div class="loading-text">Karanlık koridorlar hazırlanıyor…</div>
+      <div class="loading-progress" aria-hidden="true"><span></span></div>
       <div class="loading-note">Lütfen bekleyiniz…</div>
     </div>
 
@@ -40,7 +43,7 @@
           src="https://dehliz.b-cdn.net/videolarda%20giri%C5%9F%20logo.png"
           alt="DEHLİZ logo"
           class="brand-logo"
-          loading="lazy"
+          loading="eager"
         />
         <span>DEHLİZ</span>
       </a>

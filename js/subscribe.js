@@ -5,6 +5,7 @@
   const LEGAL_POLICY_VERSION = "2026-04-27";
   const planMap = cfg.plans || {};
   let pendingPlanKey = "";
+  let pendingPromoKey = "";
 
   function normalizeBool(v) {
     return v === true || v === 1 || v === "1" || String(v).toLowerCase() === "true";
@@ -62,6 +63,25 @@
     return false;
   }
 
+  async function claimFreeLaunchPromo(user) {
+    if (!user) throw new Error("Giriş yapmanız gerekiyor.");
+    const idToken = await user.getIdToken();
+    const base = (window.DEHLIZ_CONFIG && window.DEHLIZ_CONFIG.recoveryApiBase) || "";
+    if (!base) throw new Error("API adresi yapılandırılmamış.");
+    const endpoint = base.replace(/\/$/, "") + "/promoFreeMonth";
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + idToken
+      },
+      body: JSON.stringify({ promo: "launch_free_1m" })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) throw new Error((data && data.message) || "İşlem başarısız.");
+    return data;
+  }
+
   async function saveBillingConsent(user, planKey) {
     if (!user || !user.uid) return;
     await DataService.userRef(user.uid).child("legalConsents").update({
@@ -104,12 +124,21 @@
 
   function openPurchaseConsent(planKey) {
     pendingPlanKey = planKey;
+    pendingPromoKey = "";
     const planCfg = planMap[planKey] || {};
     const label = String(planCfg.label || "Seçilen paket");
     const price = Number(planCfg.priceTl || 0);
     const months = Number(planCfg.months || 0);
     $("purchaseConsentPlan").textContent =
       "Seçilen paket: " + label + " - " + price + " TL (" + months + " ay)";
+    $("billingConsent").checked = false;
+    $("purchaseConsentModal").classList.add("open");
+  }
+
+  function openPromoConsent(promoKey) {
+    pendingPlanKey = "";
+    pendingPromoKey = String(promoKey || "");
+    $("purchaseConsentPlan").textContent = "Açılışa özel kampanya: 1 ay ücretsiz +PLUS (0 TL)";
     $("billingConsent").checked = false;
     $("purchaseConsentModal").classList.add("open");
   }
@@ -137,6 +166,31 @@
     const renewAt = readRenewalAt(profile);
     const pro = normalizeBool(profile && profile.isPro) && !(renewAt && Date.now() > renewAt);
     const left = daysUntil(renewAt);
+
+    // Açılış kampanyası CTA durumunu güncelle.
+    (function updatePromoCta() {
+      const btn = document.querySelector(".promo-free-btn");
+      if (!btn) return;
+      const usedOnce = !!(profile && profile.promo && profile.promo.launchFreeMonthUsedAt);
+      if (pro) {
+        btn.disabled = true;
+        btn.classList.remove("btn-primary");
+        btn.classList.add("btn-ghost");
+        btn.textContent = "Zaten abonesiniz";
+        return;
+      }
+      if (usedOnce) {
+        btn.disabled = true;
+        btn.classList.remove("btn-primary");
+        btn.classList.add("btn-ghost");
+        btn.textContent = "Kampanya kullanıldı";
+        return;
+      }
+      btn.disabled = false;
+      btn.classList.add("btn-primary");
+      btn.classList.remove("btn-ghost");
+      btn.textContent = "Ücretsiz +PLUS’u Aktifleştir";
+    })();
 
     if (pro) {
       const startAt = readStartAt(profile);
@@ -202,11 +256,30 @@
           return;
         }
         const planKey = String(btn.getAttribute("data-plan") || "");
+        // Şimdilik yalnızca açılış kampanyası aktif.
+        if (planKey === "plus_2m" || planKey === "plus_3m") {
+          alert("Bu paket şu an aktif değil. Açılışa özel 1 aylık ücretsiz +PLUS kampanyasını kullanabilirsiniz.");
+          return;
+        }
         if (!planMap[planKey]) {
           alert("Seçilen planın Shopier bağlantısı henüz tanımlı değil. Yönetici ayarlarını kontrol edin.");
           return;
         }
         openPurchaseConsent(planKey);
+      });
+    });
+
+    document.querySelectorAll(".promo-free-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.disabled) return;
+        const user = dehlizAuth.currentUser;
+        if (!user || !user.uid) {
+          $("authErr").style.display = "none";
+          $("authModal").classList.add("open");
+          return;
+        }
+        const promoKey = String(btn.getAttribute("data-promo") || "launch_free_1m");
+        openPromoConsent(promoKey);
       });
     });
 
@@ -219,18 +292,31 @@
         return;
       }
       if (!assertConsent()) return;
-      const planKey = pendingPlanKey;
-      const planCfg = planMap[planKey] || null;
-      const checkoutUrl = planCfg ? String(planCfg.checkoutUrl || "").trim() : "";
-      if (!planCfg || !checkoutUrl) {
-        alert("Seçilen planın Shopier bağlantısı henüz tanımlı değil. Yönetici ayarlarını kontrol edin.");
-        return;
-      }
       const continueBtn = $("purchaseConsentContinue");
       continueBtn.disabled = true;
       const oldText = continueBtn.textContent;
-      continueBtn.textContent = "Yönlendiriliyor…";
+      continueBtn.textContent = "İşleniyor…";
       try {
+        // Öncelik: açılış kampanyası (ücretsiz).
+        if (pendingPromoKey) {
+          $("purchaseConsentModal").classList.remove("open");
+          await saveBillingConsent(user, "promo:" + pendingPromoKey);
+          await claimFreeLaunchPromo(user);
+          const profile = await DataService.userOnce(user.uid);
+          renderStatus(user, profile);
+          alert("Tebrikler! +PLUS hesabınıza 1 ay ücretsiz tanımlandı.");
+          pendingPromoKey = "";
+          return;
+        }
+
+        // Shopier ödemeli akış (şimdilik sayfadan kaldırıldı ama kod kalsın).
+        const planKey = pendingPlanKey;
+        const planCfg = planMap[planKey] || null;
+        const checkoutUrl = planCfg ? String(planCfg.checkoutUrl || "").trim() : "";
+        if (!planCfg || !checkoutUrl) {
+          alert("Seçilen planın Shopier bağlantısı henüz tanımlı değil. Yönetici ayarlarını kontrol edin.");
+          return;
+        }
         await saveBillingConsent(user, planKey);
         window.location.href = buildCheckoutUrl(checkoutUrl, user, planKey, planCfg);
       } finally {

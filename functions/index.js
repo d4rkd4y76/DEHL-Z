@@ -56,6 +56,17 @@ async function verifyRequestUser(req) {
   return decoded;
 }
 
+function readExpiryAt(profile) {
+  const p = profile || {};
+  const sub = p.subscription || {};
+  const candidates = [sub.nextBillingAt, sub.renewAt, sub.expiresAt, sub.plusUntil, p.renewAt, p.expiresAt, p.plusUntil];
+  for (let i = 0; i < candidates.length; i++) {
+    const n = Number(candidates[i]);
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  return 0;
+}
+
 exports.accountRecovery = onRequest({ region: "europe-west1" }, async (req, res) => {
   cors(res);
   if (req.method === "OPTIONS") {
@@ -221,6 +232,85 @@ exports.myListToggle = onRequest({ region: "europe-west1" }, async (req, res) =>
       return;
     }
     res.status(500).json({ ok: false, message: "İşlem sırasında hata oluştu." });
+  }
+});
+
+exports.promoFreeMonth = onRequest({ region: "europe-west1" }, async (req, res) => {
+  cors(res);
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+  if (req.method !== "POST") {
+    res.status(405).json({ ok: false, message: "Yalnızca POST desteklenir." });
+    return;
+  }
+
+  try {
+    const authUser = await verifyRequestUser(req);
+    const uid = authUser.uid;
+    const promo = String((req.body && req.body.promo) || "").trim() || "launch_free_1m";
+    if (promo !== "launch_free_1m") {
+      res.status(400).json({ ok: false, message: "Geçersiz kampanya." });
+      return;
+    }
+
+    const userRef = admin.database().ref("users/" + uid);
+    const snap = await userRef.once("value");
+    const profile = snap.val() || {};
+
+    // 1 hesap 1 kez kuralı
+    const alreadyUsed =
+      !!(profile.promo && profile.promo.launchFreeMonthUsedAt) ||
+      (profile.subscription && String(profile.subscription.provider || "").toLowerCase() === "promo_launch_free") ||
+      (profile.subscription && String(profile.subscription.plan || "").toLowerCase() === "promo_1m_free");
+    if (alreadyUsed) {
+      res.status(409).json({ ok: false, message: "Bu ücretsiz açılış kampanyasını bu hesap daha önce kullandı." });
+      return;
+    }
+
+    // Aktif +PLUS varken üstüne ekletmeyelim (kullanıcıya net kural)
+    const proFlag = profile.isPro === true || profile.isPro === 1 || profile.isPro === "1";
+    const expiryAt = readExpiryAt(profile);
+    const isProActive = proFlag && !(expiryAt && Date.now() > expiryAt);
+    if (isProActive) {
+      res.status(409).json({ ok: false, message: "Hesabınızda zaten aktif +PLUS var. Ücretsiz kampanya yalnızca 1 kez kullanılabilir." });
+      return;
+    }
+
+    const now = Date.now();
+    const durationMs = 30 * 24 * 60 * 60 * 1000; // 1 ay ~ 30 gün
+    const expiresAt = now + durationMs;
+
+    await userRef.update({
+      isPro: true,
+      plusUntil: expiresAt,
+      subscription: {
+        provider: "promo_launch_free",
+        status: "active",
+        plan: "promo_1m_free",
+        months: 1,
+        startedAt: now,
+        expiresAt,
+        renewAt: expiresAt,
+        lastPaymentAt: null,
+        lastPaymentId: null,
+        updatedAt: now
+      },
+      promo: {
+        ...(profile.promo || {}),
+        launchFreeMonthUsedAt: now
+      }
+    });
+
+    res.status(200).json({ ok: true, uid, expiresAt });
+  } catch (err) {
+    const msg = String(err && err.message ? err.message : "");
+    if (msg === "unauthorized") {
+      res.status(401).json({ ok: false, message: "Yetkisiz istek." });
+      return;
+    }
+    res.status(500).json({ ok: false, message: "Kampanya aktivasyonu başarısız." });
   }
 });
 

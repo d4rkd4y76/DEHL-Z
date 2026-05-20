@@ -249,6 +249,7 @@
       plus_1m: "1 Aylık +PLUS",
       plus_2m: "2 Aylık +PLUS",
       plus_3m: "3 Aylık +PLUS",
+      promo_1m_free: "Açılışa Özel 30 Gün",
       manual_3d: "3 Günlük +PLUS",
       manual_5d: "5 Günlük +PLUS",
       manual_10d: "10 Günlük +PLUS",
@@ -259,7 +260,8 @@
     const endText = renewalAt ? new Date(renewalAt).toLocaleDateString("tr-TR") : "—";
     const leftText = left == null ? "—" : left >= 0 ? left + " gün" : "Süre doldu";
     const planText = isPlus ? planMap[planRaw] || (planRaw ? planRaw.toUpperCase() : "+PLUS PAKET") : "AKTİF PAKET YOK";
-    const providerText = provider ? provider.toUpperCase() : "PATREON";
+    const providerText =
+      provider === "promo_launch_free" ? "KAMPANYA" : provider ? provider.toUpperCase() : "PATREON";
     metaGrid.innerHTML =
       '<div class="sub-meta-item"><p class="sub-meta-label">Plan</p><p class="sub-meta-value">' +
       planText +
@@ -311,16 +313,79 @@
     return data;
   }
 
+  const loadingState = {
+    startedAt: 0,
+    rafId: 0,
+    progress: 0,
+    completeRequested: false,
+    barEl: null,
+    minDurationMs: 3000
+  };
+
+  function setLoadingProgress(value) {
+    loadingState.progress = Math.max(0, Math.min(100, value || 0));
+    if (loadingState.barEl) {
+      loadingState.barEl.style.width = loadingState.progress.toFixed(2) + "%";
+    }
+  }
+
+  function startLoadingProgress() {
+    const loading = $("loading");
+    if (!loading) return;
+    loading.classList.remove("hidden", "is-completing");
+    loadingState.startedAt = performance.now();
+    loadingState.progress = 0;
+    loadingState.completeRequested = false;
+    loadingState.barEl = loading.querySelector(".loading-progress span");
+    setLoadingProgress(4);
+    const tick = () => {
+      if (loadingState.completeRequested) return;
+      const elapsed = performance.now() - loadingState.startedAt;
+      const target = Math.min(88, 8 + elapsed / 42);
+      setLoadingProgress(loadingState.progress + (target - loadingState.progress) * 0.09);
+      loadingState.rafId = requestAnimationFrame(tick);
+    };
+    loadingState.rafId = requestAnimationFrame(tick);
+  }
+
+  async function completeLoadingProgress() {
+    loadingState.completeRequested = true;
+    if (!loadingState.startedAt) loadingState.startedAt = performance.now();
+    if (loadingState.rafId) {
+      cancelAnimationFrame(loadingState.rafId);
+      loadingState.rafId = 0;
+    }
+    const elapsed = performance.now() - loadingState.startedAt;
+    const extraWait = Math.max(0, loadingState.minDurationMs - elapsed);
+    if (extraWait > 0) await new Promise((resolve) => setTimeout(resolve, extraWait));
+    const from = loadingState.progress;
+    const duration = 640;
+    await new Promise((resolve) => {
+      const t0 = performance.now();
+      const step = (now) => {
+        const p = Math.min(1, (now - t0) / duration);
+        const eased = 1 - Math.pow(1 - p, 3);
+        setLoadingProgress(from + (100 - from) * eased);
+        if (p < 1) requestAnimationFrame(step);
+        else resolve();
+      };
+      requestAnimationFrame(step);
+    });
+  }
+
   function hideLoading() {
     const loading = $("loading");
     if (!loading) return Promise.resolve();
-    loading.classList.add("is-completing");
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        loading.classList.add("hidden");
-        resolve();
-      }, 980);
-    });
+    return completeLoadingProgress().then(
+      () =>
+        new Promise((resolve) => {
+          loading.classList.add("is-completing");
+          setTimeout(() => {
+            loading.classList.add("hidden");
+            resolve();
+          }, 980);
+        })
+    );
   }
 
   function sortCategories(obj) {
@@ -583,7 +648,8 @@
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "search-suggest-card";
-    const poster = item.posterUrl || item.backdropUrl || "";
+    const posterRaw = item.posterUrl || item.backdropUrl || "";
+    const poster = (window.dehlizMediaProxyUrl && window.dehlizMediaProxyUrl(posterRaw)) || posterRaw;
     const chips = [];
     if (item.year) chips.push('<span class="search-suggest-chip">' + String(item.year) + "</span>");
     if (item.maturity) chips.push('<span class="search-suggest-chip">' + escapeHtml(item.maturity) + "</span>");
@@ -749,7 +815,8 @@
       }
       $("heroMeta").appendChild(frag);
       $("heroDesc").textContent = item.description || "";
-      const bg = item.backdropUrl || item.posterUrl || "";
+      const bgRaw = item.backdropUrl || item.posterUrl || "";
+      const bg = (window.dehlizMediaProxyUrl && window.dehlizMediaProxyUrl(bgRaw)) || bgRaw;
       $("heroBg").style.backgroundImage = bg ? "url(" + JSON.stringify(bg).slice(1, -1) + ")" : "";
       const disabled = state.heroItems.length <= 1;
       if (prev) prev.disabled = disabled;
@@ -962,7 +1029,8 @@
     $("dTitle").textContent = item.title || "";
     const hero = $("dHero");
     if (hero) {
-      const bg = item.backdropUrl || item.posterUrl || "";
+      const bgRaw = item.backdropUrl || item.posterUrl || "";
+      const bg = (window.dehlizMediaProxyUrl && window.dehlizMediaProxyUrl(bgRaw)) || bgRaw;
       hero.style.backgroundImage = bg ? "url(" + JSON.stringify(bg).slice(1, -1) + ")" : "";
     }
     const dMeta = $("dMeta");
@@ -1005,7 +1073,7 @@
       '<div class="card-media' +
       (canUseMyList() ? " has-list-btn" : "") +
       '"><img class="card-poster" alt="" src="' +
-      (item.posterUrl || "") +
+      (((window.dehlizMediaProxyUrl && window.dehlizMediaProxyUrl(item.posterUrl || "")) || item.posterUrl || "")) +
       '" loading="lazy" />' +
       (canUseMyList()
         ? '<button type="button" class="card-list-btn' +
@@ -1766,6 +1834,8 @@
   }
 
   document.addEventListener("DOMContentLoaded", async () => {
+    startLoadingProgress();
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     modals();
     wireCategoriesMenu();
     wireNavScroll();

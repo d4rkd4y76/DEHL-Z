@@ -110,6 +110,30 @@
         font-weight: 900;
         color: #fbbf24;
       }
+      .amt-old {
+        color: rgba(244, 244, 245, 0.55);
+        margin-right: 0.6rem;
+        font-weight: 800;
+        text-decoration-thickness: 3px;
+      }
+      .price-card.is-disabled {
+        opacity: 0.42;
+        filter: saturate(0.35);
+      }
+      .price-card.is-disabled .plan-buy-btn {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .price-card.is-disabled .plan-badge {
+        background: rgba(148, 163, 184, 0.12);
+        border-color: rgba(148, 163, 184, 0.35);
+        color: #cbd5e1;
+      }
+      .plan-badge.disabled {
+        background: rgba(148, 163, 184, 0.12);
+        border-color: rgba(148, 163, 184, 0.35);
+        color: #cbd5e1;
+      }
       .price-sub {
         margin: 0.2rem 0 0.95rem;
         color: #e4e4e7;
@@ -419,25 +443,20 @@
     <section class="sub-hero">
       <h1 style="font-size: clamp(2rem, 4vw, 2.75rem); margin: 0 0 0.5rem">DEHLİZ +Plus</h1>
       <p style="color: var(--muted); max-width: 560px; line-height: 1.6; margin: 0">
-        Shopier ile tek seferlik ödeme yap, seçtiğin süre boyunca +PLUS ayrıcalıklarını hemen kullan.
+        Dehliz.tv açılışa özel <strong>1 ay tamamen ücretsiz</strong>. Tek tıkla +PLUS’u aktif et. <strong>Her hesap 1 kez</strong> kullanabilir.
       </p>
     </section>
 
     <div class="status-box" id="statusBox"></div>
 
-    <div class="plan-carousel-toolbar" id="planCarouselToolbar" aria-label="Paket gezinme">
-      <div class="plan-carousel-hint" id="planCarouselHint">Sağa sola kaydırarak avantajlı paketleri gör.</div>
-      <div class="plan-carousel-actions">
-        <button type="button" class="plan-carousel-btn" id="planPrevBtn" aria-label="Önceki paket">‹</button>
-        <button type="button" class="plan-carousel-btn" id="planNextBtn" aria-label="Sonraki paket">›</button>
-      </div>
-    </div>
-
     <div class="sub-grid" id="planGrid">
-      <div class="price-card">
+      <div class="price-card recommended">
+        <span class="plan-badge best">AÇILIŞA ÖZEL</span>
         <h2>1 Aylık +PLUS</h2>
-        <p class="amt">119 ₺</p>
-        <p class="price-sub">Kısa süreli +PLUS erişimi için hızlı başlangıç paketi.</p>
+        <p class="amt"><s class="amt-old">149 ₺</s>0 ₺</p>
+        <p class="price-sub">
+          Açılışa özel kampanya: <strong>1 ay ücretsiz +PLUS</strong>. Bu kampanya <strong>her hesap için 1 kez</strong> kullanılabilir.
+        </p>
         <div class="plus-badges" aria-label="+PLUS avantaj rozetleri">
           <span class="plus-badge ads-free">REKLAMSIZ</span>
           <span class="plus-badge bg-play">ARKA PLANDA OYNATMA</span>
@@ -451,15 +470,17 @@
           <li>Arka planda oynatma</li>
           <li>Reklamsız deneyim</li>
         </ul>
-        <button type="button" class="btn btn-primary plan-buy-btn shopier-buy-btn" data-plan="plus_1m">1 Aylık Al</button>
+        <button type="button" class="btn btn-primary plan-buy-btn promo-free-btn" data-promo="launch_free_1m">
+          Ücretsiz +PLUS’u Aktifleştir
+        </button>
       </div>
 
-      <div class="price-card advantage">
-        <span class="plan-badge advantage">AVANTAJLI</span>
+      <div class="price-card advantage is-disabled" aria-disabled="true">
+        <span class="plan-badge disabled">AKTİF DEĞİL</span>
         <h2>2 Aylık +PLUS</h2>
         <p class="amt">199 ₺</p>
         <p class="plan-unit-note">Aylık karşılığı: <strong>99,5 ₺</strong></p>
-        <p class="price-sub">Fiyat avantajı isteyenler için daha dengeli paket.</p>
+        <p class="price-sub">Bu seçenek şimdilik pasif.</p>
         <div class="plus-badges" aria-label="+PLUS avantaj rozetleri">
           <span class="plus-badge ads-free">REKLAMSIZ</span>
           <span class="plus-badge bg-play">ARKA PLANDA OYNATMA</span>
@@ -473,15 +494,17 @@
           <li>Arka planda oynatma</li>
           <li>Reklamsız deneyim</li>
         </ul>
-        <button type="button" class="btn btn-primary plan-buy-btn shopier-buy-btn" data-plan="plus_2m">2 Aylık Al</button>
+        <button type="button" class="btn btn-ghost plan-buy-btn shopier-buy-btn" data-plan="plus_2m" disabled>
+          Aktif değil
+        </button>
       </div>
 
-      <div class="price-card recommended">
-        <span class="plan-badge best">EN İYİ SEÇENEK</span>
+      <div class="price-card recommended is-disabled" aria-disabled="true">
+        <span class="plan-badge disabled">AKTİF DEĞİL</span>
         <h2>3 Aylık +PLUS</h2>
         <p class="amt">249 ₺</p>
         <p class="plan-unit-note">Aylık karşılığı: <strong>83 ₺</strong></p>
-        <p class="price-sub">En yüksek fiyat/performans. Uzun süreli +PLUS deneyimi.</p>
+        <p class="price-sub">Bu seçenek şimdilik pasif.</p>
         <div class="plus-badges" aria-label="+PLUS avantaj rozetleri">
           <span class="plus-badge ads-free">REKLAMSIZ</span>
           <span class="plus-badge bg-play">ARKA PLANDA OYNATMA</span>
@@ -495,7 +518,9 @@
           <li>Arka planda oynatma</li>
           <li>Reklamsız deneyim</li>
         </ul>
-        <button type="button" class="btn btn-primary plan-buy-btn shopier-buy-btn" data-plan="plus_3m">3 Aylık Al</button>
+        <button type="button" class="btn btn-ghost plan-buy-btn shopier-buy-btn" data-plan="plus_3m" disabled>
+          Aktif değil
+        </button>
       </div>
     </div>
 
@@ -534,9 +559,7 @@
               <a href="refund-policy.html" target="_blank" rel="noopener">Üyelik İptal/İade Koşulları</a> metinlerini okudum, kabul ediyorum.
             </span>
           </label>
-          <p class="sub-note" style="margin-top: 0.8rem">
-            Bu ödeme tek seferlik üyelik paketidir. Otomatik yenileme yapılmaz.
-          </p>
+          <p class="sub-note" style="margin-top: 0.8rem">Açılış kampanyası: 1 ay ücretsiz +PLUS. Her hesap 1 kez kullanabilir.</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-ghost" data-close="purchaseConsentModal">Vazgeç</button>

@@ -1,4 +1,15 @@
 {
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "functions/**",
+      "admin/**",
+      "*.local"
+    ]
+  },
   "functions": [
     {
       "source": "functions",
