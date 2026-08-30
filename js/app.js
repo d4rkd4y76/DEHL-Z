@@ -1690,44 +1690,33 @@
     $("btnForgotPw").addEventListener("click", async () => {
       clearRecoveryMessages();
       $("authErr").style.display = "none";
-      $("recQuestion").value = "";
-      $("recAnswer").value = "";
       $("recEmail").value = ($("em").value || "").trim();
       $("recoveryModal").classList.add("open");
     });
     $("btnRecRecover").addEventListener("click", async () => {
       clearRecoveryMessages();
       const email = ($("recEmail").value || "").trim();
-      const question = ($("recQuestion").value || "").trim();
-      const answer = ($("recAnswer").value || "").trim();
       if (!email) {
         $("recErr").textContent = "Lütfen e-posta adresinizi girin.";
-        $("recErr").style.display = "block";
-        return;
-      }
-      if (!question) {
-        $("recErr").textContent = "Lütfen gizli soru seçin.";
-        $("recErr").style.display = "block";
-        return;
-      }
-      if (answer.length < 2) {
-        $("recErr").textContent = "Lütfen gizli soru cevabını girin.";
         $("recErr").style.display = "block";
         return;
       }
       const btn = $("btnRecRecover");
       const old = btn.textContent;
       btn.disabled = true;
-      btn.textContent = "Kontrol ediliyor…";
+      btn.textContent = "Gönderiliyor…";
       try {
-        const out = await recoveryApi({ action: "recover", email, question, answer });
+        if (!window.DehlizAuthMail || typeof window.DehlizAuthMail.sendPasswordReset !== "function") {
+          throw new Error("Mail servisi hazır değil.");
+        }
+        await window.DehlizAuthMail.sendPasswordReset(email);
         $("recOk").textContent =
-          "Tek kullanımlık şifreniz: " +
-          out.tempPassword +
-          " . Bu şifreyle giriş yapın ve Profil kısmından hemen yeni şifre belirleyin.";
+          "Sıfırlama maili gönderildi. Gelen kutunu (ve spam klasörünü) kontrol et; kırmızı düğmeye dokununca yeni şifreni yazarsın.";
         $("recOk").style.display = "block";
       } catch (e) {
-        $("recErr").textContent = (e && e.message) || "Kurtarma işlemi başarısız.";
+        $("recErr").textContent = window.DehlizAuthMail
+          ? window.DehlizAuthMail.turkishAuthError(e)
+          : (e && e.message) || "Mail gönderilemedi.";
         $("recErr").style.display = "block";
       } finally {
         btn.disabled = false;

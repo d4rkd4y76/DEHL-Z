@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>DEHLİZ · Hesap onayı</title>
+<link rel="icon" href="https://dehliz.b-cdn.net/videolarda%20giri%C5%9F%20logo.png"/>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; min-height: 100%; background: #09090b; font-family: "Segoe UI", "Trebuchet MS", sans-serif; }
+  body {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background:
+      radial-gradient(ellipse 70% 45% at 50% 8%, rgba(220, 38, 38, 0.22) 0%, transparent 55%),
+      linear-gradient(180deg, #120808 0%, #09090b 55%, #050505 100%);
+    color: #fafafa;
+  }
+  .card {
+    width: min(440px, 100%);
+    background: rgba(18, 18, 20, 0.94);
+    border: 1px solid #2a2a2e;
+    border-radius: 22px;
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+    text-align: center;
+  }
+  .art {
+    display: block;
+    width: 100%;
+    height: 168px;
+    object-fit: cover;
+    object-position: center;
+    background: #1a0505;
+  }
+  .body { padding: 22px 22px 26px; }
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: rgba(220, 38, 38, 0.18);
+    color: #f87171;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  h1 { margin: 12px 0 8px; font-size: 1.4rem; }
+  p { margin: 0 0 10px; line-height: 1.45; color: #d4d4d8; font-size: 0.98rem; }
+  .err { color: #fca5a5; }
+  .ok { color: #86efac; }
+  label { display: block; text-align: left; font-size: 0.85rem; margin: 10px 0 4px; color: #a1a1aa; }
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #3f3f46;
+    background: #0c0c0e;
+    color: #fff;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 1rem;
+  }
+  button {
+    margin-top: 16px;
+    width: 100%;
+    border: 0;
+    border-radius: 999px;
+    padding: 13px 16px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+    background: linear-gradient(180deg, #ef4444, #dc2626 55%, #991b1b);
+    color: #fff;
+  }
+  button[disabled] { opacity: 0.55; cursor: wait; }
+  a.ghost {
+    display: inline-block;
+    margin-top: 14px;
+    color: #f87171;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .spin {
+    width: 36px; height: 36px; margin: 18px auto;
+    border: 4px solid rgba(220,38,38,0.2);
+    border-top-color: #ef4444;
+    border-radius: 50%;
+    animation: s 0.8s linear infinite;
+  }
+  @keyframes s { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="card">
+  <img class="art" alt="DEHLİZ" src="mail/assets/dehliz-mail-hero.jpg"/>
+  <div class="body">
+    <span class="badge">DEHLİZ</span>
+    <h1 id="title">Hesap kontrol ediliyor</h1>
+    <div class="spin" id="spin"></div>
+    <p id="copy">E-posta bağlantın doğrulanıyor. Bir saniye…</p>
+    <form id="resetForm" hidden>
+      <label for="p1">Yeni şifre</label>
+      <input id="p1" type="password" autocomplete="new-password" minlength="6" placeholder="En az 6 karakter, harf ve rakam"/>
+      <label for="p2">Yeni şifre (tekrar)</label>
+      <input id="p2" type="password" autocomplete="new-password" minlength="6" placeholder="Aynısını yaz"/>
+      <button type="submit" id="saveBtn">Şifreyi kaydet</button>
+    </form>
+    <a class="ghost" href="index.html">Giriş ekranına dön</a>
+  </div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/auth-mail.js"></script>
+<script>
+(function () {
+  if (window.DehlizAuthMail) window.DehlizAuthMail.applyTurkish();
+
+  var params = new URLSearchParams(String(location.search || "").replace(/&amp;/g, "&"));
+  var mode = params.get("mode") || "";
+  var oobCode = params.get("oobCode") || "";
+  var linkToken = params.get("t") || "";
+  var title = document.getElementById("title");
+  var copy = document.getElementById("copy");
+  var spin = document.getElementById("spin");
+  var form = document.getElementById("resetForm");
+  var auth = window.dehlizAuth;
+
+  function fail(msg) {
+    spin.hidden = true;
+    title.textContent = "Bağlantı kullanılamadı";
+    copy.className = "err";
+    copy.textContent = msg || "Bu mail artık işe yaramıyor. Girişte yeni bir mail iste.";
+  }
+  function ok(h, msg) {
+    spin.hidden = true;
+    form.hidden = true;
+    title.textContent = h;
+    copy.className = "ok";
+    copy.textContent = msg;
+  }
+  function emptyContinue() {
+    spin.hidden = true;
+    form.hidden = true;
+    title.textContent = "DEHLİZ’e hoş geldin";
+    copy.className = "ok";
+    copy.textContent = "E-postadaki kırmızı düğmeye tıkladıysan hesabın onaylanmıştır. Ana sayfadan e-posta ve şifrenle giriş yap.";
+  }
+  function bindResetForm(submitFn) {
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var p1 = document.getElementById("p1").value;
+      var p2 = document.getElementById("p2").value;
+      if (p1.length < 6 || !/(?=.*[A-Za-z])(?=.*\d)/.test(p1)) {
+        copy.className = "err";
+        copy.textContent = "Şifre en az 6 karakter olmalı, en az bir harf ve bir rakam içermeli.";
+        return;
+      }
+      if (p1 !== p2) {
+        copy.className = "err";
+        copy.textContent = "Şifreler aynı değil.";
+        return;
+      }
+      var btn = document.getElementById("saveBtn");
+      btn.disabled = true;
+      submitFn(p1).then(function () {
+        ok("Şifren yenilendi", "Yeni şifrenle giriş yapabilirsin.");
+      }).catch(function (err) {
+        btn.disabled = false;
+        copy.className = "err";
+        copy.textContent = window.DehlizAuthMail ? window.DehlizAuthMail.turkishAuthError(err) : (err && err.message);
+      });
+    });
+  }
+
+  if (linkToken && window.DehlizAuthMail && window.DehlizAuthMail.consumeLink) {
+    window.DehlizAuthMail.consumeLink(linkToken).then(function (data) {
+      if (data && data.needPassword) {
+        spin.hidden = true;
+        title.textContent = "Yeni şifre belirle";
+        copy.textContent = "Harf ve rakam içeren yeni bir şifre yaz. Bu sayfa 3 gün açık kalır.";
+        form.hidden = false;
+        bindResetForm(function (password) {
+          return window.DehlizAuthMail.consumeLink(linkToken, password);
+        });
+        return;
+      }
+      var email = (data && data.email) || "";
+      var uid = auth.currentUser && auth.currentUser.uid;
+      return window.DehlizAuthMail.markEmailVerified(email, uid).then(function () {
+        ok("Hesabın aktif!", "DEHLİZ’e hoş geldin. Artık giriş yapıp izlemeye başlayabilirsin.");
+      });
+    }).catch(function (err) {
+      fail(window.DehlizAuthMail.turkishAuthError(err));
+    });
+    return;
+  }
+
+  if (!oobCode || !mode) {
+    emptyContinue();
+    return;
+  }
+
+  if (mode === "verifyEmail" || mode === "verifyAndChangeEmail") {
+    title.textContent = "Hesabın onaylanıyor";
+    var verifyEmail = "";
+    auth.checkActionCode(oobCode).then(function (info) {
+      verifyEmail = (info && info.data && (info.data.email || info.data.fromEmail)) || "";
+      return auth.applyActionCode(oobCode);
+    }).then(function () {
+      if (window.DehlizAuthMail) {
+        return window.DehlizAuthMail.markEmailVerified(verifyEmail, auth.currentUser && auth.currentUser.uid);
+      }
+    }).then(function () {
+      ok("Hesabın aktif!", "DEHLİZ’e hoş geldin. Artık giriş yapıp izlemeye başlayabilirsin.");
+    }).catch(function (err) {
+      fail(window.DehlizAuthMail ? window.DehlizAuthMail.turkishAuthError(err) : (err && err.message));
+    });
+    return;
+  }
+
+  if (mode === "resetPassword") {
+    spin.hidden = true;
+    title.textContent = "Yeni şifre belirle";
+    copy.textContent = "E-postandaki kod doğrulandı. Harf ve rakam içeren yeni bir şifre yaz.";
+    form.hidden = false;
+    bindResetForm(function (p1) {
+      return auth.confirmPasswordReset(oobCode, p1);
+    });
+    return;
+  }
+
+  fail("Bu e-posta bağlantısı tanınmadı.");
+})();
+</script>
+</body>
+</html>

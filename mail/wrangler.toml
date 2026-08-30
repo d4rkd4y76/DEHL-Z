@@ -1,0 +1,11 @@
+name = "dehliz-auth-mail"
+main = "cloudflare-worker.js"
+compatibility_date = "2024-11-01"
+
+# Custom domain (Workers & Pages → Custom Domains):
+#   api.dehliz.tv  → this worker
+# Or use workers.dev URL and set DEHLIZ_CONFIG.mailApiBase accordingly.
+
+[vars]
+# Public Firebase web API key (optional; worker uses service account for admin)
+FIREBASE_WEB_API_KEY = "AIzaSyB2INNHbTyaIDNsPz_XbMql28aHinf6wIA"

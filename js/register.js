@@ -66,6 +66,49 @@
     sessionStorage.removeItem(REGISTER_DRAFT_KEY);
   }
 
+  function showVerifyPanel(email) {
+    const form = $("regFormPanel");
+    const formActions = $("regFormActions");
+    const panel = $("regVerifyPanel");
+    const verifyActions = $("regVerifyActions");
+    if (form) form.classList.add("hidden");
+    if (formActions) formActions.classList.add("hidden");
+    if (panel) panel.classList.remove("hidden");
+    if (verifyActions) verifyActions.classList.remove("hidden");
+    if ($("verifyEmailHint")) {
+      $("verifyEmailHint").textContent = email
+        ? email + " adresine onay maili gönderdik."
+        : "Onay maili gönderildi.";
+    }
+  }
+
+  async function resendVerify() {
+    hideErr();
+    $("regOk").classList.add("hidden");
+    const user = dehlizAuth.currentUser;
+    if (!user) {
+      showErr("Oturum bulunamadı. Lütfen tekrar kayıt ol.");
+      return;
+    }
+    const btn = $("btnResendVerify");
+    const old = btn ? btn.textContent : "";
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Gönderiliyor…";
+    }
+    try {
+      await window.DehlizAuthMail.sendVerification(user);
+      showOk("Onay maili yeniden gönderildi. Gelen kutunu ve spam klasörünü kontrol et.");
+    } catch (e) {
+      showErr(window.DehlizAuthMail ? window.DehlizAuthMail.turkishAuthError(e) : dehlizUserError(e, "Mail gönderilemedi."));
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = old;
+      }
+    }
+  }
+
   async function register() {
     hideErr();
     $("regOk").classList.add("hidden");
@@ -91,6 +134,7 @@
     btn.textContent = "Oluşturuluyor…";
     try {
       saveDraft();
+      if (window.DehlizAuthMail) window.DehlizAuthMail.applyTurkish();
       const cred = await dehlizAuth.createUserWithEmailAndPassword(email, pw);
       await DataService.ensureUserProfile(cred.user, name);
       await DataService.updateDisplayName(cred.user.uid, name);
@@ -108,10 +152,18 @@
         refundVersion: LEGAL_POLICY_VERSION
       });
       clearDraft();
-      showOk("Kayıt tamamlandı. Ana sayfaya yönlendiriliyorsunuz…");
-      setTimeout(() => {
-        window.location.href = "index.html";
-      }, 900);
+      try {
+        await window.DehlizAuthMail.sendVerification(cred.user);
+      } catch (mailErr) {
+        showErr(
+          (window.DehlizAuthMail ? window.DehlizAuthMail.turkishAuthError(mailErr) : "Mail gönderilemedi.") +
+            " Hesabın oluştu; aşağıdaki düğmeyle maili yeniden isteyebilirsin."
+        );
+        showVerifyPanel(email);
+        return;
+      }
+      showVerifyPanel(email);
+      showOk("Kayıt tamam. E-postandaki kırmızı düğmeyle hesabını onayla, sonra giriş yap.");
     } catch (e) {
       showErr(dehlizUserError(e, "Kayıt sırasında hata oluştu."));
     } finally {
@@ -132,10 +184,17 @@
     if ($("privacyLink")) $("privacyLink").addEventListener("click", saveDraft);
     if ($("refundLink")) $("refundLink").addEventListener("click", saveDraft);
     $("btnRegister").addEventListener("click", register);
+    if ($("btnResendVerify")) $("btnResendVerify").addEventListener("click", resendVerify);
     $("btnToLogin").addEventListener("click", () => {
       clearDraft();
       const email = encodeURIComponent(($("regEmail").value || "").trim());
       window.location.href = "index.html?auth=login&email=" + email;
     });
+    if ($("btnVerifyToLogin")) {
+      $("btnVerifyToLogin").addEventListener("click", () => {
+        const email = encodeURIComponent(($("regEmail").value || dehlizAuth.currentUser && dehlizAuth.currentUser.email || "").trim());
+        window.location.href = "index.html?auth=login&email=" + email;
+      });
+    }
   });
 })();

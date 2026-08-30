@@ -1,4 +1,9 @@
 # Yerel gizli yapılandırma — repoya asla göndermeyin
 js/config.local.js
+functions/.env
+functions/.env.*
+!.env.example
+mail/.dev.vars
+.firebase/
 .DS_Store
 Thumbs.db

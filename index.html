@@ -225,33 +225,20 @@
     <div class="modal-backdrop" id="recoveryModal">
       <div class="modal">
         <div class="modal-header">
-          <h2>Gizli Soru ile Şifre Kurtarma</h2>
+          <h2>Şifreni yenile</h2>
           <button type="button" class="modal-close" data-close="recoveryModal">&times;</button>
         </div>
         <div class="modal-body">
+          <p style="margin-top:0;color:var(--muted,#a1a1aa);line-height:1.45">
+            E-posta adresini yaz. DEHLİZ’ten Türkçe bir mail gelecek; içindeki kırmızı düğmeyle yeni şifreni belirlersin.
+          </p>
           <label for="recEmail">E-posta</label>
           <input id="recEmail" type="email" autocomplete="email" />
-          <div class="recovery-grid">
-            <div>
-              <label for="recQuestion">Gizli soru</label>
-              <select id="recQuestion">
-                <option value="">Bir soru seçin</option>
-                <option value="İlkokul öğretmeninizin adı nedir?">İlkokul öğretmeninizin adı nedir?</option>
-                <option value="En sevdiğiniz film nedir?">En sevdiğiniz film nedir?</option>
-                <option value="Doğduğunuz ilçenin adı nedir?">Doğduğunuz ilçenin adı nedir?</option>
-                <option value="Çocukluk lakabınız nedir?">Çocukluk lakabınız nedir?</option>
-              </select>
-            </div>
-            <div>
-              <label for="recAnswer">Cevap</label>
-              <input id="recAnswer" type="text" autocomplete="off" />
-            </div>
-          </div>
           <p id="recErr" class="msg msg-error" style="display: none"></p>
           <p id="recOk" class="msg msg-ok" style="display: none"></p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="btnRecRecover">Tek kullanımlık şifre üret</button>
+          <button type="button" class="btn btn-primary" id="btnRecRecover">Sıfırlama maili gönder</button>
         </div>
       </div>
     </div>
@@ -280,6 +267,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
     <script src="js/config.js"></script>
     <script src="js/core.js"></script>
+    <script src="js/auth-mail.js"></script>
     <script src="js/data-service.js"></script>
     <script src="js/app.js"></script>
   </body>

@@ -10,46 +10,61 @@
     <main class="auth-wrap">
       <section class="auth-card">
         <a href="index.html" class="brand">DEHLİZ</a>
-        <h1>Yeni Üyelik Oluştur</h1>
-        <p class="auth-sub">Yorumlarda görünecek kullanıcı adını sen belirle.</p>
 
-        <label for="regName">Kullanıcı adı</label>
-        <input id="regName" type="text" maxlength="32" placeholder="ornek: KaranlikYazar" />
+        <div id="regFormPanel">
+          <h1>Yeni Üyelik Oluştur</h1>
+          <p class="auth-sub">Yorumlarda görünecek kullanıcı adını sen belirle. Kayıttan sonra e-postana onay maili gelir.</p>
 
-        <label for="regEmail">E-posta</label>
-        <input id="regEmail" type="email" autocomplete="email" />
+          <label for="regName">Kullanıcı adı</label>
+          <input id="regName" type="text" maxlength="32" placeholder="ornek: KaranlikYazar" />
 
-        <label for="regPw">Şifre</label>
-        <input id="regPw" type="password" autocomplete="new-password" />
+          <label for="regEmail">E-posta</label>
+          <input id="regEmail" type="email" autocomplete="email" />
 
-        <label for="regPw2">Şifre (tekrar)</label>
-        <input id="regPw2" type="password" autocomplete="new-password" />
+          <label for="regPw">Şifre</label>
+          <input id="regPw" type="password" autocomplete="new-password" />
 
-        <label for="regSecretQ">Gizli soru</label>
-        <select id="regSecretQ">
-          <option value="">Bir soru seçin</option>
-          <option value="İlkokul öğretmeninizin adı nedir?">İlkokul öğretmeninizin adı nedir?</option>
-          <option value="En sevdiğiniz film nedir?">En sevdiğiniz film nedir?</option>
-          <option value="Doğduğunuz ilçenin adı nedir?">Doğduğunuz ilçenin adı nedir?</option>
-          <option value="Çocukluk lakabınız nedir?">Çocukluk lakabınız nedir?</option>
-        </select>
+          <label for="regPw2">Şifre (tekrar)</label>
+          <input id="regPw2" type="password" autocomplete="new-password" />
 
-        <label for="regSecretA">Gizli soru cevabı</label>
-        <input id="regSecretA" type="text" maxlength="64" autocomplete="off" />
+          <label for="regSecretQ">Gizli soru</label>
+          <select id="regSecretQ">
+            <option value="">Bir soru seçin</option>
+            <option value="İlkokul öğretmeninizin adı nedir?">İlkokul öğretmeninizin adı nedir?</option>
+            <option value="En sevdiğiniz film nedir?">En sevdiğiniz film nedir?</option>
+            <option value="Doğduğunuz ilçenin adı nedir?">Doğduğunuz ilçenin adı nedir?</option>
+            <option value="Çocukluk lakabınız nedir?">Çocukluk lakabınız nedir?</option>
+          </select>
 
-        <label class="consent-check" for="regLegalConsent">
-          <input id="regLegalConsent" type="checkbox" />
-          <span>
-            <a id="privacyLink" href="privacy.html">Gizlilik Politikası</a> ve
-            <a id="refundLink" href="refund-policy.html">İptal/İade Koşulları</a> metinlerini okudum, kabul ediyorum.
-          </span>
-        </label>
+          <label for="regSecretA">Gizli soru cevabı</label>
+          <input id="regSecretA" type="text" maxlength="64" autocomplete="off" />
+
+          <label class="consent-check" for="regLegalConsent">
+            <input id="regLegalConsent" type="checkbox" />
+            <span>
+              <a id="privacyLink" href="privacy.html">Gizlilik Politikası</a> ve
+              <a id="refundLink" href="refund-policy.html">İptal/İade Koşulları</a> metinlerini okudum, kabul ediyorum.
+            </span>
+          </label>
+        </div>
+
+        <div id="regVerifyPanel" class="hidden">
+          <h1>E-postanı onayla</h1>
+          <p class="auth-sub" id="verifyEmailHint">Onay maili gönderildi.</p>
+          <p class="auth-sub">Gelen kutuna (ve spam’e) bak. DEHLİZ logosulu maildeki kırmızı düğmeye dokununca üyeliğin açılır.</p>
+        </div>
 
         <p class="msg msg-error hidden" id="regErr"></p>
         <p class="msg msg-ok hidden" id="regOk"></p>
 
-        <button type="button" class="btn btn-primary" id="btnRegister">Kayıt ol</button>
-        <button type="button" class="btn btn-ghost" id="btnToLogin">Zaten üyeyim, giriş yap</button>
+        <div id="regFormActions">
+          <button type="button" class="btn btn-primary" id="btnRegister">Kayıt ol</button>
+          <button type="button" class="btn btn-ghost" id="btnToLogin">Zaten üyeyim, giriş yap</button>
+        </div>
+        <div id="regVerifyActions" class="hidden">
+          <button type="button" class="btn btn-primary" id="btnResendVerify">Maili tekrar gönder</button>
+          <button type="button" class="btn btn-ghost" id="btnVerifyToLogin">Giriş ekranına dön</button>
+        </div>
       </section>
     </main>
 
@@ -58,6 +73,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
     <script src="js/config.js"></script>
     <script src="js/core.js"></script>
+    <script src="js/auth-mail.js"></script>
     <script src="js/data-service.js"></script>
     <script src="js/register.js"></script>
   </body>

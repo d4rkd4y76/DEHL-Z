@@ -15,6 +15,8 @@ window.DEHLIZ_CONFIG = window.DEHLIZ_CONFIG || {
   },
   bunnyEmbedBase: "https://iframe.mediadelivery.net/embed",
   recoveryApiBase: "https://europe-west1-dehliz-a95cd.cloudfunctions.net",
+  mailApiBase: "https://europe-west1-dehliz-a95cd.cloudfunctions.net/authMail",
+  supportEmail: "destek.dehliz@gmail.com",
   shopier: {
     supportEmail: "destek.dehliz@gmail.com",
     plans: {

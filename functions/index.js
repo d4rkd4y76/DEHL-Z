@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const { onRequest } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
+const authMailLib = require("./auth-mail");
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -485,5 +486,107 @@ exports.shopierWebhook = onRequest({ region: "europe-west1" }, async (req, res) 
     res.status(200).json({ ok: true, uid, planKey, months });
   } catch (_e) {
     res.status(500).json({ ok: false, message: "Shopier webhook işlenemedi." });
+  }
+});
+
+exports.authMail = onRequest({ region: "europe-west1" }, async (req, res) => {
+  cors(res);
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+  if (req.method === "GET") {
+    res.status(200).json({ ok: true, service: "dehliz-auth-mail" });
+    return;
+  }
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "method" });
+    return;
+  }
+
+  let body = req.body;
+  if (typeof body === "string") {
+    try {
+      body = JSON.parse(body || "{}");
+    } catch (_e) {
+      res.status(400).json({ error: "json" });
+      return;
+    }
+  }
+  body = body || {};
+  const kind = body.type === "reset" ? "reset" : body.type === "consume" ? "consume" : "verify";
+
+  try {
+    if (kind === "consume") {
+      let payload;
+      try {
+        payload = authMailLib.readLink(body.token);
+      } catch (err) {
+        const code = String(err && err.message) === "expired" ? "expired" : "token";
+        res.status(code === "expired" ? 410 : 400).json({ error: code });
+        return;
+      }
+      const uid = await findUidByEmail(payload.em);
+      if (!uid) {
+        res.status(400).json({ error: "token" });
+        return;
+      }
+      if (payload.typ === "reset" && !body.password) {
+        res.status(200).json({ ok: true, needPassword: true, email: payload.em });
+        return;
+      }
+      if (payload.typ === "reset") {
+        const password = String(body.password || "");
+        if (password.length < 6 || !/(?=.*[A-Za-z])(?=.*\d)/.test(password)) {
+          res.status(400).json({ error: "password" });
+          return;
+        }
+        await admin.auth().updateUser(uid, { password, emailVerified: true });
+        res.status(200).json({ ok: true, mode: "resetPassword", email: payload.em });
+        return;
+      }
+      await admin.auth().updateUser(uid, { emailVerified: true });
+      res.status(200).json({ ok: true, mode: "verifyEmail", email: payload.em });
+      return;
+    }
+
+    if (kind === "verify") {
+      const authHeader = String(req.get("authorization") || req.get("Authorization") || "");
+      const match = authHeader.match(/^Bearer\s+(.+)$/i);
+      const idToken = (match && match[1]) || String(body.idToken || "");
+      if (!idToken) {
+        res.status(401).json({ error: "auth" });
+        return;
+      }
+      const decoded = await admin.auth().verifyIdToken(idToken);
+      const email = String((decoded && decoded.email) || "").trim().toLowerCase();
+      if (!email) {
+        res.status(401).json({ error: "auth" });
+        return;
+      }
+      const token = authMailLib.signLink("verify", email);
+      await authMailLib.sendResend(email, "verify", authMailLib.toActionLink(token));
+      res.status(200).json({ ok: true });
+      return;
+    }
+
+    const email = String(body.email || "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      res.status(400).json({ error: "email" });
+      return;
+    }
+    const uid = await findUidByEmail(email);
+    if (uid) {
+      const token = authMailLib.signLink("reset", email);
+      await authMailLib.sendResend(email, "reset", authMailLib.toActionLink(token));
+    }
+    res.status(200).json({ ok: true });
+  } catch (err) {
+    const msg = String((err && err.message) || "");
+    if (msg === "resend_config" || msg === "resend") {
+      res.status(500).json({ error: "mail" });
+      return;
+    }
+    res.status(502).json({ error: "send" });
   }
 });
