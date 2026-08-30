@@ -4,7 +4,7 @@
 (function (global) {
   "use strict";
 
-  var ACTION_URL = "https://dehliz-a95cd.web.app/auth-action.html";
+  var ACTION_URL = "https://www.dehliz.tv/auth-action.html";
   var DEFAULT_MAIL_API = "https://europe-west1-dehliz-a95cd.cloudfunctions.net/authMail";
 
   function mailApi() {

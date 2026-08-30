@@ -4,10 +4,8 @@
  */
 const crypto = require("crypto");
 
-const HERO = "https://dehliz-a95cd.web.app/mail/assets/dehliz-mail-hero.jpg";
+const HERO = "https://www.dehliz.tv/mail/assets/dehliz-mail-hero.jpg";
 const ACTION = "https://www.dehliz.tv/auth-action.html";
-// Fallback action host while GitHub Pages propagates new files:
-const ACTION_FALLBACK = "https://dehliz-a95cd.web.app/auth-action.html";
 const VERIFY_TTL = 7 * 24 * 3600;
 const RESET_TTL = 3 * 24 * 3600;
 const FROM = "DEHLİZ ekibi <noreply@dehliz.tv>";
@@ -82,8 +80,7 @@ function readLink(token) {
 }
 
 function toActionLink(token) {
-  // Prefer custom domain; web.app always has the latest hosting deploy.
-  return ACTION_FALLBACK + "?t=" + encodeURIComponent(token);
+  return ACTION + "?t=" + encodeURIComponent(token);
 }
 
 async function sendResend(to, type, link) {

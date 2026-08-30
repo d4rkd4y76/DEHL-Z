@@ -8,8 +8,8 @@
  *   npx wrangler secret put GOOGLE_SA_JSON
  *   npx wrangler deploy
  */
-const HERO = "https://dehliz-a95cd.web.app/mail/assets/dehliz-mail-hero.jpg";
-const ACTION = "https://dehliz-a95cd.web.app/auth-action.html";
+const HERO = "https://www.dehliz.tv/mail/assets/dehliz-mail-hero.jpg";
+const ACTION = "https://www.dehliz.tv/auth-action.html";
 const VERIFY_TTL = 7 * 24 * 3600;
 const RESET_TTL = 3 * 24 * 3600;
 const PROJECT = "dehliz-a95cd";
